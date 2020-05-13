@@ -63,7 +63,9 @@ app.use('/machinesCategories', juegosCategoriesRoutes);
 app.use('/colors', colorRoutes);
 app.use('/carousel', carouselRoutes);
 app.get('/', (req, res) => {
-  res.send("Si jala");
+	req.getConnection((err, conn) => {
+		res.json(err);
+	  });
 });
 
 // static files
