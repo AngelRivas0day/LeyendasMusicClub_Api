@@ -60,7 +60,6 @@ app.use(session({
 }))
 app.use(bodyParser.urlencoded({extended : false}));
 app.use(bodyParser.json());
-app.use(express.bodyParser());
 
 app.get('/customers', (req, res) => {
   const sql = 'SELECT * FROM products';
