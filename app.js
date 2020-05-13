@@ -9,17 +9,17 @@ var bodyParser = require('body-parser');
 const session = require('express-session');
 
 // importing routes
-const productRoutes = require('./routes/product');
-const eventRoutes = require('./routes/event');
-const gameRoutes = require('./routes/games');
-const adminRoutes = require('./routes/admin');
-const reservationRoutes = require('./routes/reservations');
-const machineRoutes = require('./routes/machines');
-const orderRoutes = require('./routes/order');
-const gamesCategoriesRoutes = require('./routes/gamesCategories');
-const juegosCategoriesRoutes = require('./routes/juegosCategories');
-const colorRoutes = require('./routes/color');
-const carouselRoutes = require('./routes/carousel');
+const productRoutes = require('./src/routes/product');
+const eventRoutes = require('./src/routes/event');
+const gameRoutes = require('./src/routes/games');
+const adminRoutes = require('./src/routes/admin');
+const reservationRoutes = require('./src/routes/reservations');
+const machineRoutes = require('./src/routes/machines');
+const orderRoutes = require('./src/routes/order');
+const gamesCategoriesRoutes = require('./src/routes/gamesCategories');
+const juegosCategoriesRoutes = require('./src/routes/juegosCategories');
+const colorRoutes = require('./src/routes/color');
+const carouselRoutes = require('./src/routes/carousel');
 
 // settings
 app.set('port', process.env.PORT || 3000);
@@ -69,4 +69,4 @@ app.get('/', (req, res) => {
 // static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.listen(app.get('port'), () => console.log(`Server running on port ${PORT}`));
+app.listen(app.get('port'), () => console.log(`Server running on port ${app.get('port')}`));
