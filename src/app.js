@@ -38,7 +38,7 @@ app.use(myConnection(mysql, {
   database: 'heroku_6c5270acb0de78a',
   connectionLimit: 10,
   connectTimeout: 30000, //30 secs
-}));
+}, 'multiple'));
 app.use(express.urlencoded({
 	extended: false
 }));
