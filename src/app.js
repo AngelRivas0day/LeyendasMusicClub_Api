@@ -29,12 +29,13 @@ app.use(morgan('dev'));
 app.use(cors(
     'Access-Control-Allow-Origin: *'
 ));
+
 app.use(myConnection(mysql, {
-	host: 'localhost',
-	user: 'root',
-	password: 'password',
+	host: 'us-cdbr-east-06.cleardb.net',
+	user: 'b7a012a450a854',
+	password: 'f2b590f1',
 	port: 8889,
-	database: 'leyendas'
+	database: 'heroku_6c5270acb0de78a'
 }, 'single'));
 app.use(express.urlencoded({
 	extended: false
