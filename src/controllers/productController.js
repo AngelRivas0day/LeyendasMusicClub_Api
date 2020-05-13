@@ -18,7 +18,10 @@ controller.list = (req, res) => {
   req.getConnection((err, conn) => {
     conn.query("SELECT * FROM products", (err, prods) => {
       if (err) {
-        res.send("Hubo un error");
+        res.send({
+          error: err,
+          success: false
+        });
       }
       console.log(prods);
       res.json(prods);
@@ -166,7 +169,7 @@ controller.edit = (req, res) => {
 controller.update = (req, res) => {
   const { id } = req.params;
   const newData = req.body;
-  
+
   // console.log(newData);
   req.getConnection((err, conn) => {
     conn.query(
