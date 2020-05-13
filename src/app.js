@@ -64,17 +64,7 @@ app.use('/colors', colorRoutes);
 app.use('/carousel', carouselRoutes);
 app.use("/", (req, res)=>{
   req.getConnection((err, conn) => {
-    conn.query("SELECT * FROM products", (err, prods) => {
-      if (err) {
-        res.send({
-          error: err,
-          success: false
-        });
-      }
-      console.log(prods);
-      res.json(prods);
-    });
-  });
+    res.send("Si jala");
 });
 
 // static files
