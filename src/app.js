@@ -22,7 +22,7 @@ const colorRoutes = require('./routes/color');
 const carouselRoutes = require('./routes/carousel');
 
 // settings
-app.set('port', process.env.PORT || 3000);
+const PORT =  process.env.PORT || 3000;
 
 // middleware
 app.use(morgan('dev'));
@@ -80,8 +80,8 @@ app.use("/", (req, res)=>{
 });
 
 // static files
-app.use(express.static(path.join(__dirname, 'public')));
+// app.use(express.static(path.join(__dirname, 'public')));
 
-app.listen(app.get('port'), () => {
+app.listen(PORT, () => {
     console.log("server running in port 3000");
 });
