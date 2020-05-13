@@ -64,7 +64,7 @@ app.use('/colors', colorRoutes);
 app.use('/carousel', carouselRoutes);
 app.use("/", (req, res)=>{
   res.status(200).json({
-    message: "it works";
+    message: "it works"
   });
 });
 
