@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start":"node src/app.js"
+    "start": "node src/app.js"
   },
   "keywords": [],
   "author": "",
@@ -32,6 +32,6 @@
     "sql": "0.78.0"
   },
   "devDependencies": {
-    "passport-local": "1.0.0",
+    "passport-local": "1.0.0"
   }
 }
