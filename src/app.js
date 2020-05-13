@@ -62,14 +62,11 @@ app.use('/gamesCategories', gamesCategoriesRoutes);
 app.use('/machinesCategories', juegosCategoriesRoutes);
 app.use('/colors', colorRoutes);
 app.use('/carousel', carouselRoutes);
-app.use("/", (req, res)=>{
-  req.getConnection((err, conn) => {
-    res.send("Si jala");
+app.get('/', (req, res) => {
+  res.send("Si jala");
 });
 
 // static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.listen(app.get('port'), () => {
-    console.log("server running in port 3000");
-});
+app.listen(app.get('port'), () => console.log(`Server running on port ${PORT}`));
