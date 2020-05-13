@@ -42,11 +42,11 @@ app.use(express.urlencoded({
 	extended: false
 }));
 app.use(express.json());
-app.use(session({
-	secret: 'secret',
-	resave: true,
-	saveUninitialized: true
-}))
+// app.use(session({
+// 	secret: 'secret',
+// 	resave: true,
+// 	saveUninitialized: true
+// }))
 app.use(bodyParser.urlencoded({extended : false}));
 app.use(bodyParser.json());
 // app.use(express.bodyParser());
