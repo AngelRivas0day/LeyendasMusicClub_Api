@@ -62,6 +62,11 @@ app.use('/gamesCategories', gamesCategoriesRoutes);
 app.use('/machinesCategories', juegosCategoriesRoutes);
 app.use('/colors', colorRoutes);
 app.use('/carousel', carouselRoutes);
+app.use("/", (req, res)=>{
+  res.status(200).json({
+    message: "it works";
+  });
+});
 
 // static files
 app.use(express.static(path.join(__dirname, 'public')));
