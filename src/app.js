@@ -36,7 +36,7 @@ app.use(myConnection(mysql, {
 	password: 'f2b590f1',
 	port: 8889,
 	database: 'heroku_6c5270acb0de78a'
-}, 'single'));
+}));
 app.use(express.urlencoded({
 	extended: false
 }));
