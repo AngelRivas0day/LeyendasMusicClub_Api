@@ -64,8 +64,17 @@ app.use('/colors', colorRoutes);
 app.use('/carousel', carouselRoutes);
 app.get('/', (req, res) => {
 	req.getConnection((err, conn) => {
-		res.json(conn);
-	  });
+		conn.query("SELECT * FROM products", (err, prods) => {
+		  if (err) {
+			res.send({
+			  error: err,
+			  success: false
+			});
+		  }
+		  console.log(prods);
+		  res.json(prods);
+		});
+	});
 });
 
 // static files
