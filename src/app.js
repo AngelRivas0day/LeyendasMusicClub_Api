@@ -35,7 +35,9 @@ app.use(myConnection(mysql, {
 	user: 'b7a012a450a854',
 	password: 'f2b590f1',
 	port: 8889,
-	database: 'heroku_6c5270acb0de78a'
+  database: 'heroku_6c5270acb0de78a',
+  connectionLimit: 10,
+  connectTimeout: 30000, //30 secs
 }));
 app.use(express.urlencoded({
 	extended: false
