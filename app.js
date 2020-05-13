@@ -64,7 +64,7 @@ app.use('/colors', colorRoutes);
 app.use('/carousel', carouselRoutes);
 app.get('/', (req, res) => {
 	req.getConnection((err, conn) => {
-		res.json(err);
+		res.json(conn);
 	  });
 });
 
