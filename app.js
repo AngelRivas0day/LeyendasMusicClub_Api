@@ -62,18 +62,29 @@ app.use('/gamesCategories', gamesCategoriesRoutes);
 app.use('/machinesCategories', juegosCategoriesRoutes);
 app.use('/colors', colorRoutes);
 app.use('/carousel', carouselRoutes);
-app.get('/', (req, res) => {
-	req.getConnection((err, conn) => {
-		conn.query("SELECT * FROM products", (err, prods) => {
-		  if (err) {
-			res.send({
-			  error: err,
-			  success: false
+app.get('/', (req, res, next) => {
+	function test(){
+		console.log("it works!!!");
+		return new Promise(function(resolve, reject){
+			req.getConnection((errCon, con)=>{
+				if(errCon){
+					reject(errCon)
+				}else{
+					conn.query("SELECT * FROM products", (err, rows)=>{
+						if(err){
+							reject(err);
+						}else{
+							resolve(rows);
+						}
+					});
+				}
 			});
-		  }
-		  console.log(prods);
-		  res.json(prods);
 		});
+	}
+	test().then((rows)=>{
+		res.send("Si jala we");
+	}).catch((err)=>{
+		throw err;
 	});
 });
 
