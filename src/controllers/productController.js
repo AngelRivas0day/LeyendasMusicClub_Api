@@ -7,10 +7,9 @@ var storage = multer.diskStorage({
     cb(null, "src/uploads/products");
   },
   filename: function (req, file, cb) {
-    cb(null, file.fieldname + "-" + Date.now() + "-borrar.jpg");
+    cb(null, file.fieldname + "-" + Date.now() + "-.jpg");
   },
 });
-var upload = multer({ storage: storage }).single("image");
 var multipleUpload = multer({ storage: storage }).array("images", 25);
 
 controller.getAll = function(req, res, next){
@@ -96,7 +95,7 @@ controller.listDataTable = (req, res) => {
   });
 };
 
-controller.add = (req, res) => {
+controller.create = (req, res) => {
   multipleUpload(req, res, function (err) {
     var data = req.body;
     let images = req.files;
@@ -142,7 +141,7 @@ controller.add = (req, res) => {
   });
 };
 
-controller.getOne = (req, res) => {
+controller.getOne = function(req, res){
   const { id } = req.params;
   function getOne(){
     return new Promise((resolve, reject)=>{
