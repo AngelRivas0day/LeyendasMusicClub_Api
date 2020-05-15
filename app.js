@@ -34,7 +34,7 @@ app.use(myConnection(mysql, {
 	host: 'us-cdbr-east-06.cleardb.net',
 	user: 'b7a012a450a854',
 	password: 'f2b590f1',
-	port: 8889,
+	// port: 8889,
 	database: 'heroku_6c5270acb0de78a'
 }));
 app.use(express.urlencoded({
@@ -66,7 +66,7 @@ app.get('/', (req, res, next) => {
 	function test(){
 		console.log("it works!!!");
 		return new Promise(function(resolve, reject){
-			req.getConnection((errCon, con)=>{
+			req.getConnection((errCon, conn)=>{
 				if(errCon){
 					reject(errCon)
 				}else{
