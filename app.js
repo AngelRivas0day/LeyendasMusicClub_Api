@@ -51,17 +51,17 @@ app.use(bodyParser.json());
 // app.use(express.bodyParser());
 
 // routes
-app.use('/products', productRoutes);
-app.use('/events', eventRoutes);
-app.use('/games', gameRoutes);
-app.use('/admin', adminRoutes);
-app.use('/reservations', reservationRoutes);
-app.use('/machines', machineRoutes);
-app.use('/orders', orderRoutes);
-app.use('/gamesCategories', gamesCategoriesRoutes);
-app.use('/machinesCategories', juegosCategoriesRoutes);
-app.use('/colors', colorRoutes);
-app.use('/carousel', carouselRoutes);
+// app.use('/products', productRoutes);
+// app.use('/events', eventRoutes);
+// app.use('/games', gameRoutes);
+// app.use('/admin', adminRoutes);
+// app.use('/reservations', reservationRoutes);
+// app.use('/machines', machineRoutes);
+// app.use('/orders', orderRoutes);
+// app.use('/gamesCategories', gamesCategoriesRoutes);
+// app.use('/machinesCategories', juegosCategoriesRoutes);
+// app.use('/colors', colorRoutes);
+// app.use('/carousel', carouselRoutes);
 app.get('/', (req, res, next) => {
 	function get(){
 		console.log("it works!!!");
