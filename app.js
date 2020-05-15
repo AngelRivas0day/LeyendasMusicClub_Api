@@ -82,7 +82,7 @@ app.get('/', (req, res, next) => {
 		});
 	}
 	test().then((rows)=>{
-		res.send("Si jala we");
+		res.send(rows);
 	}).catch((err)=>{
 		throw err;
 	});
