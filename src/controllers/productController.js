@@ -13,68 +13,65 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage }).single("image");
 var multipleUpload = multer({ storage: storage }).array("images", 25);
 
-controller.list = (req, res) => {
-  // res.send("Si jala el customer list");
-  req.getConnection((err, conn) => {
-    conn.query("SELECT * FROM products", (err, prods) => {
-      if (err) {
-        res.send({
-          error: err,
-          success: false
-        });
-      }
-      console.log(prods);
-      res.json(prods);
-    });
-  });
-};
-
-controller.multipleImage = (req, res) => {
-  const { id } = req.params;
-  multipleUpload(req, res, function (err) {
-    console.log(req.body);
-    console.log(req.file);
-    console.log(req.files);
-    var data = req.body;
-    let colors = req.body.colors;
-    let images = req.files;
-    let fileNames = [];
-    images.forEach((image) => {
-      fileNames.push(image.filename);
-    });
-    data.images = JSON.stringify(fileNames);
-    data.colors = JSON.stringify([colors]);
-    req.getConnection((err, conn) => {
-      const query = conn.query(
-        "UPDATE products SET ? WHERE id = ?",
-        [data, id],
-        (err, rows) => {
-          if (err) {
-            console.log(err);
-          } else {
-            res.status(200).send({
-              message: "La into fue creada con exito",
-            });
-          }
-        }
-      );
-    });
-  });
+controller.getAll = (req, res, next) => {
+  function get(){
+		return new Promise(function(resolve, reject){
+			req.getConnection((errCon, conn)=>{
+				if(errCon){
+					reject(errCon);
+				}else{
+					conn.query("SELECT * FROM products", (err, rows)=>{
+						if(err){
+							reject(err);
+						}else{
+							resolve(rows);
+						}
+					});
+				}
+			});
+		});
+	}
+	get().then((rows)=>{
+		res.status(200).send(rows);
+	}).catch((err)=>{
+    res.status(500).send({
+      sucess: false,
+      message: "There was an error",
+      error: err
+    })
+		throw err;
+	});
 };
 
 controller.listNewItems = (req, res) => {
   // res.send("Si jala el customer list");
-  req.getConnection((err, conn) => {
-    conn.query(
-      "SELECT * FROM ( SELECT * FROM products ORDER BY id DESC LIMIT 4 ) sub ORDER BY id DESC",
-      (err, prods) => {
-        if (err) {
-          res.send("Hubo un error");
+  function getNew(){
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, conn)=>{
+        if(err){
+          reject(err);
+        }else{
+          conn.query("SELECT * FROM ( SELECT * FROM products ORDER BY id DESC LIMIT 4 ) sub ORDER BY id DESC",
+          (err, rows)=>{
+            if(err){
+              reject(err);
+            }else{
+              resolve(rows);
+            }
+          });
         }
-        console.log(prods);
-        res.json(prods);
-      }
-    );
+      });
+    });
+  };
+  getNew().then((rows)=>{
+    res.status(200).json(rows);
+  }).catch((err)=>{
+    res.status(500).send({
+      success: false,
+      message: "There was an error",
+      error: err
+    });
+    throw err;
   });
 };
 
@@ -145,24 +142,42 @@ controller.add = (req, res) => {
   });
 };
 
-controller.edit = (req, res) => {
+controller.getOne = (req, res) => {
   const { id } = req.params;
-  req.getConnection((err, conn) => {
-    conn.query("SELECT * FROM products WHERE id = ?", [id], (err, rows) => {
-      if (err) {
-        res.status(500).status({
-          success: false,
-          message: "Hubo un error",
-          error: err,
-        });
-      } else {
-        let colors = rows[0].colors;
-        let images = rows[0].images;
-        rows[0].colors = JSON.parse(colors);
-        rows[0].images = JSON.parse(images);
-        res.status(200).json(rows[0]);
-      }
+  function getOne(){
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, conn)=>{
+        if(err){
+          reject(err);
+        }else{
+          conn.query(
+            "SELECT * FROM products WHERE id = ?",
+            [id],
+            (err, rows)=>{
+              if(err){
+                reject(err);
+              }else{
+                resolve(rows[0]);
+              }
+            }
+          );
+        }
+      });
     });
+  }
+  getOne().then((row)=>{
+    let colors = row.colors;
+    let images = row.images;
+    row.colors = JSON.parse(colors);
+    row.images = JSON.parse(images);
+    res.status(200).json(row);
+  }).catch((err)=>{
+    res.status(500).send({
+      sucess: false,
+      message: "There was an error",
+      error: err
+    })
+		throw err;
   });
 };
 

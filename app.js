@@ -63,12 +63,12 @@ app.use('/machinesCategories', juegosCategoriesRoutes);
 app.use('/colors', colorRoutes);
 app.use('/carousel', carouselRoutes);
 app.get('/', (req, res, next) => {
-	function test(){
+	function get(){
 		console.log("it works!!!");
 		return new Promise(function(resolve, reject){
 			req.getConnection((errCon, conn)=>{
 				if(errCon){
-					reject(errCon)
+					reject(errCon);
 				}else{
 					conn.query("SELECT * FROM products", (err, rows)=>{
 						if(err){
@@ -81,7 +81,7 @@ app.get('/', (req, res, next) => {
 			});
 		});
 	}
-	test().then((rows)=>{
+	get().then((rows)=>{
 		res.send(rows);
 	}).catch((err)=>{
 		throw err;
