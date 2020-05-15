@@ -12,7 +12,7 @@ var storage = multer.diskStorage({
 });
 var multipleUpload = multer({ storage: storage }).array("images", 25);
 
-controller.getAll = function(req, res, next){
+controller.getAll = (req, res, next)=>{
   function get(){
 		return new Promise(function(resolve, reject){
 			req.getConnection((errCon, conn)=>{
@@ -141,7 +141,7 @@ controller.create = (req, res) => {
   });
 };
 
-controller.getOne = function(req, res){
+controller.getOne = (req, res)=>{
   const { id } = req.params;
   function getOne(){
     return new Promise((resolve, reject)=>{
