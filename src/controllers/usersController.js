@@ -3,12 +3,12 @@ const controller = {};
 controller.listAll = (req, res) => {
     // res.send("Si jala el customer list");
     req.getConnection((err, conn) => {
-        conn.query('SELECT * FROM user', (err, user) => {
+        conn.query('SELECT * FROM users', (err, rows) => {
             if(err){
                 res.send("Hubo un error");
             }
-            console.log(user);
-            res.json(user);
+            console.log(rows);
+            res.json(rows);
         });
     });;
 };
@@ -17,7 +17,7 @@ controller.create = (req, res) => {
     const data = req.body;
     console.log(req.body)
     req.getConnection((err, connection) => {
-    const query = connection.query('INSERT INTO user set ?', data, (err, data) => {
+    const query = connection.query('INSERT INTO users set ?', data, (err, data) => {
       console.log(data);
       res.redirect('/');
     })
@@ -27,7 +27,7 @@ controller.create = (req, res) => {
 controller.listOne = (req, res) => {
   const { id } = req.params;
   req.getConnection((err, conn) => {
-    conn.query("SELECT * FROM user WHERE id = ?", [id], (err, rows) => {
+    conn.query("SELECT * FROM users WHERE id = ?", [id], (err, rows) => {
     //   res.render('customers_edit', {
     //     data: rows[0]
     //   })
@@ -41,7 +41,7 @@ controller.edit = (req, res) => {
   const { id } = req.params;
   const newCustomer = req.body;
   req.getConnection((err, conn) => {
-    conn.query('UPDATE user set ? where id = ?', [newCustomer, id], (err, rows) => {
+    conn.query('UPDATE users set ? where id = ?', [newCustomer, id], (err, rows) => {
       res.redirect('/');
     });
   });
@@ -50,7 +50,7 @@ controller.edit = (req, res) => {
 controller.delete = (req, res) => {
     const { id } = req.params;
     req.getConnection((err, connection) => {
-      connection.query('DELETE FROM user WHERE id = ?', [id], (err, rows) => {
+      connection.query('DELETE FROM users WHERE id = ?', [id], (err, rows) => {
         res.redirect('/');
       });
     });
