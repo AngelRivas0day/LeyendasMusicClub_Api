@@ -12,7 +12,7 @@ controller.register = async (req, res) => {
         if(!err && name != "" && email != ""){
             req.getConnection((err, conn) => {
                 req.body.password = hash;
-                const query = conn.query('INSERT INTO user set ?', data, (err, data) => {
+                const query = conn.query('INSERT INTO users set ?', data, (err, data) => {
                   console.log(data);
                   res.json(data);
                 })
@@ -32,7 +32,7 @@ controller.login = (req, res) => {
     const password = req.body.password;
 
     req.getConnection((err, conn)=>{
-        const query = conn.query('SELECT * FROM user where email = ?', data.email, (err, data)=>{
+        const query = conn.query('SELECT * FROM users where email = ?', data.email, (err, data)=>{
             console.log(data[0].password);
             bcrypt.compare(password, data[0].password, (err, check)=>{
                 console.log(check);
