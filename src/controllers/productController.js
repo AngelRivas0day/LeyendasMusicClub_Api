@@ -99,6 +99,23 @@ controller.listDataTable = (req, res) => {
 
 controller.create = (req, res) => {
   multipleUpload(req, res, async function (err) {
+
+
+    const uploader = async (path) => await cloudinary.uploads(path, 'images');
+    const urls = []
+    const files = req.files;
+    // console.log("Files: ", files);
+    for (const file of files) {
+      const { path } = file;
+      // console.log('File path: ', file.path);
+      const newPath = await uploader(path)
+      urls.push(newPath);
+      console.log('New path: ', newPath);
+      fs.unlinkSync(path)
+    }
+
+
+
     var data = req.body;
     let images = req.files;
     let fileNames = {};
@@ -130,17 +147,6 @@ controller.create = (req, res) => {
                 error: err
               })
             } else {
-              const uploader = async (path) => await cloudinary.uploads(path, 'images');
-              const urls = []
-              const files = req.files;
-              console.log("Files: ", files);
-              for (const file of files) {
-                const { path } = file;
-                console.log('File path: ', file.path);
-                const newPath = await uploader(path)
-                urls.push(newPath)
-                fs.unlinkSync(path)
-              }
               res.status(200).send({
                 sucess: true,
                 message: "La into fue creada con exito",
