@@ -128,7 +128,7 @@ controller.create = (req, res) => {
       fileNames[color.name] = [urls[imageIndex].url,urls[imageIndex+1].url,urls[imageIndex+2].url];
       imageIndex = imageIndex + 3;
     });
-    data.image = images[0].filename;
+    data.image = urls[0].url;
     data.images = JSON.stringify(fileNames);
     if (err) {
       res.status(500).send({
