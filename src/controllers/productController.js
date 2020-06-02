@@ -8,7 +8,7 @@ var storage = multer.diskStorage({
     cb(null, "src/uploads/products");
   },
   filename: function (req, file, cb) {
-    cb(null, file.fieldname + "-" + Date.now() + "cloudinary-.jpg");
+    cb(null, Date.now() + ".jpg");
   },
 });
 var multipleUpload = multer({ storage: storage }).array("images", 25);
@@ -131,21 +131,15 @@ controller.create = (req, res) => {
               })
             } else {
               const uploader = async (path) => await cloudinary.uploads(path, 'images');
-              if (req.method === 'POST') {
-                const urls = []
-                const files = req.files;
-                console.log("Files: ", files);
-                for (const file of files) {
-                  const { path } = file;
-                  console.log('File path: ', file.path);
-                  const newPath = await uploader(path)
-                  urls.push(newPath)
-                  fs.unlinkSync(path)
-                }
-              } else {
-                res.status(405).json({
-                  err: `${req.method} method not allowed`
-                })
+              const urls = []
+              const files = req.files;
+              console.log("Files: ", files);
+              for (const file of files) {
+                const { path } = file;
+                console.log('File path: ', file.path);
+                const newPath = await uploader(path)
+                urls.push(newPath)
+                fs.unlinkSync(path)
               }
               res.status(200).send({
                 sucess: true,
