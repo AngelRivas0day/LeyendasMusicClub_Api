@@ -135,11 +135,11 @@ controller.create = (req, res) => {
         message: "La info no fue actulizada con exito",
       });
     } else {
-      req.getConnection(async (err, conn) => {
+      req.getConnection((err, conn) => {
         const query = conn.query(
           "INSERT INTO products SET ?",
           [data],
-          async (err, rows) => {
+          (err, rows) => {
             if (err) {
               res.status(500).send({
                 success: false,
