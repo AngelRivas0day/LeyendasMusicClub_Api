@@ -125,7 +125,7 @@ controller.create = (req, res) => {
     let colors = JSON.parse(data.colors);
     // console.log("Colors",colors);
     Array.from(colors).forEach((color, i)=>{
-      fileNames[color.name] = [images[imageIndex].filename,images[imageIndex+1].filename,images[imageIndex+2].filename];
+      fileNames[color.name] = [urls[imageIndex].url,urls[imageIndex+1].url,urls[imageIndex+2].url];
       imageIndex = imageIndex + 3;
     });
     data.image = images[0].filename;
