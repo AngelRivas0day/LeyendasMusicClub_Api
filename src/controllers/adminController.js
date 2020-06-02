@@ -30,7 +30,6 @@ controller.register = async (req, res) => {
 controller.login = (req, res) => {
     let data = req.body;
     const password = req.body.password;
-
     req.getConnection((err, conn)=>{
         const query = conn.query('SELECT * FROM users where email = ?', data.email, (err, data)=>{
             console.log(data[0].password);
