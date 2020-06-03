@@ -19,3 +19,10 @@ exports.uploads = (file, folder) => {
         })
     })
 }
+
+exports.delete = (id) => {
+    return new Promise((resolve, reject) => {
+        const result = cloudinary.uploader.destroy(id);
+        resolve(result);
+    })
+}
