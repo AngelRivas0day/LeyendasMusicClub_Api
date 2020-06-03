@@ -242,7 +242,6 @@ controller.uploadImage = (req, res) => {
           reject(err);
         }
         // Everything went fine
-        const file = req.file;
         const { path } = file;
         const newPath = await uploader(path);
         fs.unlinkSync(path);

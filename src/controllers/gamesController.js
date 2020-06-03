@@ -272,7 +272,7 @@ controller.delete = (req, res) => {
 
 controller.uploadImage = (req, res) => {
   const id = req.params.id;
-  function uploadImage(){
+  function uploadImg(){
     return new Promise((resolve, reject)=>{
       upload(req, res, async function (err) {
         if (err) {
@@ -281,7 +281,6 @@ controller.uploadImage = (req, res) => {
         // Everything went fine
         console.log("File: ", req.file);
         const uploader = async (path) => await cloudinary.uploads(path, 'boardgames');
-        const file = req.file;
         const { path } = file;
         const newPath = await uploader(path);
         fs.unlinkSync(path);
@@ -300,7 +299,7 @@ controller.uploadImage = (req, res) => {
       });
     });
   }
-  uploadImage().then(rows=>{
+  uploadImg().then(rows=>{
     res.status(200).send({
       success: true, 
       message: "There wasnt any errors",
