@@ -275,16 +275,22 @@ controller.uploadImage = (req, res) => {
   function uploadImg(){
     return new Promise((resolve, reject)=>{
       upload(req, res, async function (err) {
+        const uploader = async (path) => await cloudinary.uploads(path, 'boardgames');
         if (err) {
           reject(err);
         }
         // Everything went fine
-        console.log("File: ", req.file);
-        const uploader = async (path) => await cloudinary.uploads(path, 'boardgames');
-        const { path } = file;
-        const newPath = await uploader(path);
-        fs.unlinkSync(path);
-        console.log('New path: ', newPath);
+        console.log("Files: ", req.files);
+        if(req.files){
+          const file = req.files[0];
+          const { path } = file;
+          const newPath = await uploader(path);
+          fs.unlinkSync(path);
+          console.log('New path: ', newPath);
+          data.image = newPath.url;
+        }else{
+          data.image = "No seteado...";
+        }
         req.getConnection((err, conn) => {
           const query = conn.query('UPDATE games SET image = ? WHERE id = ?',
           [newPath.url, id],
