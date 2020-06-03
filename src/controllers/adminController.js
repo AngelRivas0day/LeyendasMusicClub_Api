@@ -8,46 +8,72 @@ controller.register = async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    const hashedPassword = await bcrypt.hash(password, 10, (err, hash)=>{
-        if(!err && name != "" && email != ""){
-            req.getConnection((err, conn) => {
-                req.body.password = hash;
-                const query = conn.query('INSERT INTO users set ?', data, (err, data) => {
-                  console.log(data);
-                  res.json(data);
-                })
+    function register(){
+        return new Promise((resolve, reject)=>{
+            const hashedPassword = await bcrypt.hash(password, 10, (err, hash)=>{
+                if(!err && name != "" && email != ""){
+                    req.getConnection((err, conn) => {
+                        req.body.password = hash;
+                        const query = conn.query('INSERT INTO users set ?', data, (err, rows) => {
+                          if(err){
+                              reject(err);
+                          }else{
+                              resolve(rows);
+                          }
+                        });
+                    });
+                }else{
+                    reject(err);
+                }
             });
-        }else{
-            res.status(500).send({
-                message: "Hubo un error al crear el usuario"
-            });
-        }
+        });
+    }
+    register().then(rows=>{
+        res.status(200).json(rows);
+    }).catch(err=>{
+        res.status(500).send({
+            message: "Hubo un error al crear el usuario",
+            error: [err]
+        });
+        throw err;
     });
-        // data.password = hashedPassword;
-
 };
 
 controller.login = (req, res) => {
     let data = req.body;
     const password = req.body.password;
-    req.getConnection((err, conn)=>{
-        const query = conn.query('SELECT * FROM users where email = ?', data.email, (err, data)=>{
-            console.log(data[0].password);
-            bcrypt.compare(password, data[0].password, (err, check)=>{
-                console.log(check);
-                if(check){
-                    res.status(200).json({
-                        success: true,
-                        token: jwt.createToken(data[0])
-                    });
-                }else{
-                    res.status(403).send({
-                        message: "Password incorrrecto"
-                    })
-                }
-            })
+    function login(){
+        return new Promise((resolve, reject)=>{
+            req.getConnection((err, conn)=>{
+                const query = conn.query('SELECT * FROM users where email = ?', data.email, (err, data)=>{
+                    // console.log(data[0].password);
+                    if(err){
+                        reject(err);
+                    }else{
+                        bcrypt.compare(password, data[0].password, (err, check)=>{
+                            if(check){
+                                resolve(data);
+                            }else{
+                                reject(err);
+                            }
+                        });
+                    }
+                    
+                });
+            });
         });
-    })
+    }
+    login().then(data=>{
+        res.status(200).json({
+            success: true,
+            token: jwt.createToken(data[0])
+        });
+    }).catch(err=>{
+        res.status(403).send({
+            message: "Password incorrrecto",
+            error: [err]
+        });
+    });
 };
 
 module.exports = controller;

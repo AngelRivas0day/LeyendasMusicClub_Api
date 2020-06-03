@@ -1,30 +1,30 @@
 const controller = {};
 
 controller.listAll = (req, res) => {
-    // res.send("Si jala el customer list");
-    function listAll(){
-      return new Promise((resolve, reject)=>{
-        req.getConnection((err, conn) => {
-          conn.query('SELECT * FROM reservations WHERE archived = 0', (err, resp) => {
-              if(err){
-                  reject(err);
-              }else{
-                resolve(rows);
-              }
-          });
+  // res.send("Si jala el customer list");
+  function listAll(){
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, conn) => {
+        conn.query('SELECT * FROM reservations WHERE archived = 0', (err, rows) => {
+          if(err){
+              reject(err);
+          }else{
+            resolve(rows);
+          }
+        });
       });
-      });
-    }
-    listAll().then(rows=>{
-      res.status(200).json(rows);
-    }).catch(err=>{
-      res.status(500).send({
-        success: false,
-        message: 'There was an error',
-        error: err
-      });
-      throw err;
     });
+  }
+  listAll().then(rows=>{
+    res.status(200).json(rows);
+  }).catch(err=>{
+    res.status(500).send({
+      success: false,
+      message: 'There was an error',
+      error: err
+    });
+    throw err;
+  });
 };
 
 controller.listDataTable = (req, res) => {
@@ -62,7 +62,6 @@ controller.create = (req, res) => {
     return new Promise((resolve, reject)=>{
       req.getConnection((err, connection) => {
         const query = connection.query('INSERT INTO reservations set ?', data, (err, data) => {
-          console.log(data);
           if(err){
             reject(err);
           }else{
@@ -188,7 +187,7 @@ controller.edit = (req, res) => {
   update().then(rows=>{
     res.status(200).send({
       status: "ok",
-      message: "La reservación fue actualizada con exito",
+      message: "There was no errors",
       data: [rows]
     });
   }).catch(err=>{
