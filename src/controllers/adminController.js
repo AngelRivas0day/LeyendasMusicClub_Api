@@ -52,6 +52,7 @@ controller.login = (req, res) => {
                     }else{
                         bcrypt.compare(password, data[0].password, (err, check)=>{
                             if(check){
+                                console.log("check: ", check);
                                 resolve(data[0].password);
                             }else{
                                 reject(err);
@@ -64,6 +65,7 @@ controller.login = (req, res) => {
         });
     }
     login().then(data=>{
+        console.log("Then data: ", data);
         res.status(200).json({
             success: true,
             token: jwt.createToken(data)
