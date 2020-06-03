@@ -57,7 +57,7 @@ controller.create = (req, res) => {
             const newPath = await uploader(path);
             fs.unlinkSync(path);
             console.log('New path: ', newPath);
-            data.image = newPath;
+            data.image = newPath.url;
           }else{
             data.image = "No seteado...";
           }
@@ -143,7 +143,7 @@ controller.edit = (req, res) => {
             const newPath = await uploader(path);
             fs.unlinkSync(path);
             console.log('New path: ', newPath);
-            data.image = newPath;
+            data.image = newPath.url;
           }
           conn.query('UPDATE events set ? WHERE id = ?', 
           [data, id], 
@@ -231,7 +231,7 @@ controller.uploadImage = (req, res) => {
         console.log('New path: ', newPath);
         req.getConnection((err, conn) => {
           const query = conn.query('UPDATE events SET image = ? WHERE id = ?',
-          [newPath, id], 
+          [newPath.url, id], 
           (err, rows) => {
             if (err) {
               reject(err);
