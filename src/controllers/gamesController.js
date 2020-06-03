@@ -275,11 +275,12 @@ controller.uploadImage = (req, res) => {
   function uploadImage(){
     return new Promise((resolve, reject)=>{
       upload(req, res, async function (err) {
-        const uploader = async (path) => await cloudinary.uploads(path, 'boardgames');
         if (err) {
           reject(err);
         }
         // Everything went fine
+        console.log("File: ", req.file);
+        const uploader = async (path) => await cloudinary.uploads(path, 'boardgames');
         const file = req.file;
         const { path } = file;
         const newPath = await uploader(path);
