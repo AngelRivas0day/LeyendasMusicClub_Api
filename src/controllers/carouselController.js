@@ -15,20 +15,30 @@ var multipleUpload = multer({ storage: storage }).array('images', 10);
 const controller = {};
 
 controller.listAll = (req, res) => {
-    // res.send("Si jala el customer list");
-    req.getConnection((err, conn) => {
-        conn.query('SELECT * FROM carousel', (err, rows) => {
-            if(err){
-                res.status(500).send({
-                    success: false,
-                    message: "Hubo un error",
-                    error: err
-                });
-            }else{
-                res.status(200).json(rows);
-            }
-        });
-    });;
+	function listAll(){
+    return new Promise((resolve, reject)=>{
+			req.getConnection((err, conn) => {
+				conn.query('SELECT * FROM carousel', 
+				(err, rows) => {
+					if(err){
+						reject(err);
+					}else{
+						resolve(rows);
+					}
+				});
+			});
+    });
+  }
+  listAll().then(rows=>{
+      res.status(200).json(rows);
+  }).catch(err=>{
+      res.status(500).send({
+          success: false,
+          message: 'There was an error',
+          error: [err]
+      });
+      throw err;
+  });
 };
 
 controller.create = (req, res) => {

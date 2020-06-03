@@ -1,30 +1,60 @@
 const controller = {};
 
 controller.listAll = (req, res) => {
-    req.getConnection((err, conn) => {
-        conn.query('SELECT * FROM colors', (err, colors) => {
-            if(err){
-                res.send("Hubo un error");
-            }
-            console.log(colors);
-            res.json(colors);
-        });
-    });;
+  function listAll(){
+    return new Promise((resolve, reject)=>{
+			req.getConnection((err, conn) => {
+				conn.query('SELECT * FROM colors', 
+				(err, rows) => {
+					if(err){
+						reject(err);
+					}else{
+						resolve(rows);
+					}
+				});
+			});
+    });
+  }
+  listAll().then(rows=>{
+      res.status(200).json(rows);
+  }).catch(err=>{
+      res.status(500).send({
+          success: false,
+          message: 'There was an error',
+          error: [err]
+      });
+      throw err;
+  });
 };
 
 controller.listDataTable = (req, res) => {
-    serachPattern = req.body.search.value;
-    req.getConnection((err, conn) => {
-        const query = conn.query(
-        'SELECT * FROM colors WHERE name LIKE ?', 
-        [`%${serachPattern}%`], 
-        (err, resp) => {
-            if(err){
-                res.send("Hubo un error");
-            }
-            res.json(resp);
-        });
-    });
+	const serachPattern = req.body.search.value;
+	function dataTables(){
+		return new Promise((resolve, reject)=>{
+			req.getConnection((err, conn) => {
+				const query = conn.query(
+				'SELECT * FROM colors WHERE name LIKE ?', 
+					[`%${serachPattern}%`], 
+					(err, resp) => {
+						if(err){
+							reject(err);
+						}else{
+							resolve(rows);
+						}
+					});
+				});
+		});
+	}
+	dataTables().then(rows=>{
+		res.status(200).json(rows);
+	}).catch(err=>{
+		res.status(500).send({
+			success: false,
+			message: 'There was an error',
+			error: [err]
+		})
+		throw err;
+	});
 };
 
 controller.create = (req, res) => {
