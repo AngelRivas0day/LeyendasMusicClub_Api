@@ -121,101 +121,132 @@ controller.listOne = (req, res) => {
 controller.edit = (req, res) => {
   const { id } = req.params;
   const path = 'src/uploads/events';
-  upload(req, res, (err)=>{
-    var data = req.body;
-    req.getConnection((err,conn)=>{
-      if(req.file){
-        conn.query('SELECT * FROM events WHERE id = ?', [id], (error, response)=>{
-          const imageToDelete = response[0].image;
-          fs.unlink(`${path}/${imageToDelete}`, (err)=>{
-              if(err){
-                  console.log(err);
-              }else{
-                  console.log("Se borro la foto");
-              }
+  function update(){
+    return new Promise((resolve, reject)=>{
+      upload(req, res, (err)=>{
+        const uploader = async (path) => await cloudinary.uploads(path, 'events');
+        var data = req.body;
+        req.getConnection((err,conn)=>{
+          if(req.file){
+            conn.query('SELECT * FROM events WHERE id = ?', [id], (error, response)=>{
+              const imageToDelete = response[0].image;
+              // fs.unlink(`${path}/${imageToDelete}`, (err)=>{
+              //     if(err){
+              //         console.log(err);
+              //     }else{
+              //         console.log("Se borro la foto");
+              //     }
+              // });
+            });
+            const file = req.file;
+            const { path } = file;
+            const newPath = await uploader(path);
+            fs.unlinkSync(path);
+            console.log('New path: ', newPath);
+            data.image = newPath;
+          }
+          conn.query('UPDATE events set ? WHERE id = ?', 
+          [data, id], 
+          (err, rows) => {
+            if (err) {
+              reject(err);
+            }else{
+              resolve(rows);
+            }
           });
         });
-        const fileName = req.file.filename;
-        data.image = fileName;
-      }
-      conn.query('UPDATE events set ? WHERE id = ?', [data, id], (err, rows) => {
-        if(err){
-          res.status(500).send({
-            success: false,
-            message: "Hubo un error",
-            error: err
-          });
-        }else{
-          res.status(200).send({
-            success:true,
-            message: "ok",
-            rows: rows
-          });
-        }
       });
     });
+  }
+  update().then(rows=>{
+
+  }).catch(err=>{
+    throw err;
   });
 };
 
 controller.delete = (req, res) => {
     const { id } = req.params;
-    const path = 'src/uploads/events';
-    req.getConnection((err, connection) => {
-      connection.query('SELECT * FROM events WHERE id = ?', [id], (error, response)=>{
-        const imageToDelete = response[0].image;
-        fs.unlink(`${path}/${imageToDelete}`, (err)=>{
-            if(err){
-                console.log(err);
+    function deleteItem(){
+      return new Promise((resolve, reject)=>{
+        req.getConnection((err, connection) => {
+          connection.query('SELECT * FROM events WHERE id = ?', [id], (error, response)=>{
+            const imageToDelete = response[0].image;
+            // fs.unlink(`${path}/${imageToDelete}`, (err)=>{
+            //     if(err){
+            //         console.log(err);
+            //     }else{
+            //         console.log("Se borro la foto");
+            //     }
+            // });
+          });
+          connection.query('DELETE FROM events WHERE id = ?', [id], (err, rows) => {
+            if (err) {
+              reject(err);
             }else{
-                console.log("Se borro la foto");
+              resolve(rows);
             }
+          });
         });
       });
-      connection.query('DELETE FROM events WHERE id = ?', [id], (err, rows) => {
-        if(err){
-          res.status(500).send({
-            success: false,
-            message: "Hubo un error",
-            error: err
-          });
-        }else{
-          res.status(200).send({
-            success:true,
-            message: "ok",
-            rows: rows
-          });
-        }
+    }
+    deleteItem().then(rows=>{
+      res.status(200).send({
+        success:true,
+        message: "There wasnt any errors",
+        rows: [rows]
+      });  
+    }).catch(err=>{
+      res.status(500).send({
+        success: false,
+        message: "Hubo un error",
+        error: [err]
       });
+      throw err;
     });
 };
 controller.uploadImage = (req, res) => {
   const id = req.params.id;
-    upload(req, res, function (err) {
+  function uploadImage(){
+    return new Promise((resolve, reject)=>{
+      upload(req, res, function (err) {
         if (err) {
-          res.status(500).send({
-            message: 'La foto no fue actulizada con exito'
-          });
+          reject(err);
         }
         // Everything went fine
-        const fileName = req.file.filename;
+        const file = req.file;
+        const { path } = file;
+        const newPath = await uploader(path);
+        fs.unlinkSync(path);
+        console.log('New path: ', newPath);
         req.getConnection((err, conn) => {
-            const query = conn.query('UPDATE events SET imageUrl = ? WHERE id = ?', [fileName, id], (err, rows) => {
-              if(err){
-                res.status(500).send({
-                  success: false,
-                  message: "Hubo un error",
-                  error: err
-                });
-              }else{
-                res.status(200).send({
-                  success:true,
-                  message: "ok",
-                  rows: rows
-                });
-              }
-            });
+          const query = conn.query('UPDATE events SET image = ? WHERE id = ?',
+          [newPath, id], 
+          (err, rows) => {
+            if (err) {
+              reject(err);
+            }else{
+              resolve(rows);
+            }
+          });
         });
-    })
+      })
+    });
+  }
+  uploadImage().then(rows=>{
+    res.status(200).send({
+      success: true, 
+      message: "There wasnt any errors",
+      data: [rows]
+    });
+  }).catch(err=>{
+    res.status(500).send({
+      success: false, 
+      message: "There was an error",
+      error: [err]
+    });
+    throw err;
+  });
 };
 
 // controller.getImage = (req, res) => {

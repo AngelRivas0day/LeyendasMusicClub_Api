@@ -77,7 +77,6 @@ controller.listNewItems = (req, res) => {
 };
 
 controller.listDataTable = (req, res) => {
-
   function dataTables(){
     return new Promise((resolve, reject)=>{
       serachPattern = req.body.search.value;
@@ -85,18 +84,17 @@ controller.listDataTable = (req, res) => {
         const query = conn.query(
           "SELECT * FROM products WHERE name LIKE ?",
           [`%${serachPattern}%`],
-          (err, resp) => {
+          (err, rows) => {
             if (err) {
               reject(err);
             }else{
-              resolve(resp);
+              resolve(rows);
             }
           }
         );
       });
     });
   }
-
   dataTables().then((rows)=>{
     res.status(200).json(rows);
   }).catch(err=>{
