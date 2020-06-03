@@ -126,7 +126,7 @@ controller.edit = (req, res) => {
       upload(req, res, async (err)=>{
         const uploader = async (path) => await cloudinary.uploads(path, 'events');
         var data = req.body;
-        req.getConnection(async (err,conn)=>{
+        req.getConnection(async function(err,conn){
           if(req.file){
             conn.query('SELECT * FROM events WHERE id = ?', [id], (error, response)=>{
               const imageToDelete = response[0].image;
@@ -159,8 +159,17 @@ controller.edit = (req, res) => {
     });
   }
   update().then(rows=>{
-
+    res.status(200).send({
+      success: true,
+      message: 'There wasnt any errors',
+      data: [rows]
+    });
   }).catch(err=>{
+    res.status(500).send({
+      success: false,
+      message: 'There was an error',
+      error: [err]
+    });
     throw err;
   });
 };
@@ -209,7 +218,7 @@ controller.uploadImage = (req, res) => {
   const id = req.params.id;
   function uploadImage(){
     return new Promise((resolve, reject)=>{
-      upload(req, res, function (err) {
+      upload(req, res, async function (err) {
         if (err) {
           reject(err);
         }
