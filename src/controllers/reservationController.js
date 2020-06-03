@@ -61,10 +61,10 @@ controller.confirm = (req, res) => {
   });
 };
 
-controller.achieve = (req, res) => {
+controller.archive = (req, res) => {
   const { id } = req.params;
   req.getConnection((err, conn) => {
-    conn.query("UPDATE reservations set achieved = 1 WHERE id = ?", [id], (err, rows) => {
+    conn.query("UPDATE reservations set archived = 1 WHERE id = ?", [id], (err, rows) => {
     console.log(rows);
     res.json(rows);
     });

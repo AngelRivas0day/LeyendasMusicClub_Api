@@ -9,7 +9,7 @@ router.get('/list/:id', reservationControler.listOne);
 router.post('/dataTable/', reservationControler.listDataTable);
 router.put('/update/:id', reservationControler.edit);
 router.put('/confirm/:id', reservationControler.confirm);
-router.put('/achieve/:id', reservationControler.achieve);
+router.put('/archived/:id', reservationControler.archive);
 router.delete('/delete/:id', reservationControler.delete);
 
 module.exports = router;
