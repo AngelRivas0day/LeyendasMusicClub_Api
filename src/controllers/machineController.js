@@ -11,6 +11,7 @@ var storage = multer.diskStorage({
     }
 });
 var upload = multer({ storage: storage }).single('image');
+const cloudinary = require('../services/cloudinary');
 
 controller.listAll = (req, res) => {
   function listAll(){
