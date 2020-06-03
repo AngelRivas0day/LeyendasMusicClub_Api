@@ -123,10 +123,10 @@ controller.edit = (req, res) => {
   const path = 'src/uploads/events';
   function update(){
     return new Promise((resolve, reject)=>{
-      upload(req, res, (err)=>{
+      upload(req, res, async (err)=>{
         const uploader = async (path) => await cloudinary.uploads(path, 'events');
         var data = req.body;
-        req.getConnection((err,conn)=>{
+        req.getConnection(async (err,conn)=>{
           if(req.file){
             conn.query('SELECT * FROM events WHERE id = ?', [id], (error, response)=>{
               const imageToDelete = response[0].image;
