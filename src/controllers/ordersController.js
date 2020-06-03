@@ -90,13 +90,15 @@ controller.create = (req, res) => {
 controller.confirm = (req, res) => {
   const { id } = req.params;
   function confirm(){
-    req.getConnection((err, conn) => {
-      conn.query("UPDATE orders set checked = 1 WHERE id = ?", [id], (err, rows) => {
-        if(err){
-          reject(err);
-        }else{
-          resolve(rows);
-        }
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, conn) => {
+        conn.query("UPDATE orders set checked = 1 WHERE id = ?", [id], (err, rows) => {
+          if(err){
+            reject(err);
+          }else{
+            resolve(rows);
+          }
+        });
       });
     });
   }

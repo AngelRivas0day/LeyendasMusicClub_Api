@@ -30,16 +30,18 @@ controller.listAll = (req, res) => {
 controller.listDataTable = (req, res) => {
   serachPattern = req.body.search.value;
   function dataTables(){
-    req.getConnection((err, conn) => {
-      const query = conn.query(
-      'SELECT * FROM reservations WHERE name LIKE ? AND archived = 0', 
-      [`%${serachPattern}%`], 
-      (err, resp) => {
-        if(err){
-          reject(err);
-        }else{
-          resolve(resp);
-        }
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, conn) => {
+        const query = conn.query(
+        'SELECT * FROM reservations WHERE name LIKE ? AND archived = 0', 
+        [`%${serachPattern}%`], 
+        (err, resp) => {
+          if(err){
+            reject(err);
+          }else{
+            resolve(resp);
+          }
+        });
       });
     });
   }
@@ -203,13 +205,15 @@ controller.edit = (req, res) => {
 controller.delete = (req, res) => {
   const { id } = req.params;
   function deleteItem(){
-    req.getConnection((err, connection) => {
-      connection.query('DELETE FROM reservations WHERE id = ?', [id], (err, rows) => {
-        if(err){
-          reject(err);
-        }else{
-          resolve(rows);
-        }
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, connection) => {
+        connection.query('DELETE FROM reservations WHERE id = ?', [id], (err, rows) => {
+          if(err){
+            reject(err);
+          }else{
+            resolve(rows);
+          }
+        });
       });
     });
   }
