@@ -52,7 +52,6 @@ controller.create = (req, res) => {
         }else{
           if(req.file){
             const file = req.file;
-            const fileName = req.file.filename;
             const { path } = file;
             const newPath = await uploader(path);
             fs.unlinkSync(path);
@@ -64,7 +63,6 @@ controller.create = (req, res) => {
           req.getConnection((err, conn) => {
               const query = conn.query('INSERT INTO events SET ?', [data], (err, rows) => {
                 if(err){
-                  console.log(err);
                   reject(err);
                 }else{
                   resolve(rows);
@@ -129,7 +127,7 @@ controller.edit = (req, res) => {
         req.getConnection(async function(err,conn){
           if(req.file){
             conn.query('SELECT * FROM events WHERE id = ?', [id], (error, response)=>{
-              const imageToDelete = response[0].image;
+              let imageToDelete = response[0].image;
               // fs.unlink(`${path}/${imageToDelete}`, (err)=>{
               //     if(err){
               //         console.log(err);
@@ -137,6 +135,15 @@ controller.edit = (req, res) => {
               //         console.log("Se borro la foto");
               //     }
               // });
+              const destroyer = async(id) => await cloudinary.delete(id);
+              imageToDelete = imageToDelete.split('/');
+              let lastIndex = imageToDelete.length;
+              var imageName = imageToDelete[lastIndex-1];
+              var imageId = imageName.split('.');
+              imageToDeleteId = imageToDelete[lastIndex-2] +"/"+ imageId[0];
+              console.log("Image to delete: ", imageToDeleteId);
+              let deletedImage = await destroyer(imageToDeleteId);
+              console.log("Deleted image: ", deletedImage);
             });
             const file = req.file;
             const { path } = file;
@@ -175,53 +182,55 @@ controller.edit = (req, res) => {
 };
 
 controller.delete = (req, res) => {
-    const { id } = req.params;
-    function deleteItem(){
-      return new Promise((resolve, reject)=>{
-        req.getConnection((err, connection) => {
-          connection.query('SELECT * FROM events WHERE id = ?', [id], async (error, response)=>{
-            var imageToDelete = response[0].image;
-            // fs.unlink(`${path}/${imageToDelete}`, (err)=>{
-            //     if(err){
-            //         console.log(err);
-            //     }else{
-            //         console.log("Se borro la foto");
-            //     }
-            // });
-            const destroyer = async(id) => await cloudinary.delete(id);
-            imageToDelete = imageToDelete.split('/');
-            let lastIndex = imageToDelete.length;
-            var imageName = imageToDelete[lastIndex-1];
-            var imageId = imageName.split('.');
-            imageToDeleteId = imageToDelete[lastIndex-2] +"/"+ imageId[0];
-            console.log("Image to delete: ", imageToDeleteId);
-            let deletedImage = await destroyer(imageToDeleteId);
-            console.log("Deleted image: ", deletedImage);
-          });
-          connection.query('DELETE FROM events WHERE id = ?', [id], (err, rows) => {
-            if (err) {
-              reject(err);
-            }else{
-              resolve(rows);
-            }
-          });
+  const { id } = req.params;
+  function deleteItem(){
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, connection) => {
+        connection.query('SELECT * FROM events WHERE id = ?', [id], async (error, response)=>{
+          var imageToDelete = response[0].image;
+          // fs.unlink(`${path}/${imageToDelete}`, (err)=>{
+          //     if(err){
+          //         console.log(err);
+          //     }else{
+          //         console.log("Se borro la foto");
+          //     }
+          // });
+          const destroyer = async(id) => await cloudinary.delete(id);
+          imageToDelete = imageToDelete.split('/');
+          let lastIndex = imageToDelete.length;
+          var imageName = imageToDelete[lastIndex-1];
+          var imageId = imageName.split('.');
+          imageToDeleteId = imageToDelete[lastIndex-2] +"/"+ imageId[0];
+          console.log("Image to delete: ", imageToDeleteId);
+          let deletedImage = await destroyer(imageToDeleteId);
+          console.log("Deleted image: ", deletedImage);
+        });
+        connection.query('DELETE FROM events WHERE id = ?',
+        [id],
+        (err, rows) => {
+          if (err) {
+            reject(err);
+          }else{
+            resolve(rows);
+          }
         });
       });
-    }
-    deleteItem().then(rows=>{
-      res.status(200).send({
-        success:true,
-        message: "There wasnt any errors",
-        rows: [rows]
-      });  
-    }).catch(err=>{
-      res.status(500).send({
-        success: false,
-        message: "Hubo un error",
-        error: [err]
-      });
-      throw err;
     });
+  }
+  deleteItem().then(rows=>{
+    res.status(200).send({
+      success:true,
+      message: "There wasnt any errors",
+      rows: [rows]
+    });  
+  }).catch(err=>{
+    res.status(500).send({
+      success: false,
+      message: "Hubo un error",
+      error: [err]
+    });
+    throw err;
+  });
 };
 controller.uploadImage = (req, res) => {
   const id = req.params.id;

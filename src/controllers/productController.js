@@ -105,7 +105,6 @@ controller.listDataTable = (req, res) => {
     });
     throw err;
   });
-  
 };
 
 controller.create = (req, res) => {

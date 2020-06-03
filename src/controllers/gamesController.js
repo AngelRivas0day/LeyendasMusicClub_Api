@@ -11,32 +11,62 @@ var storage = multer.diskStorage({
     }
 });
 var upload = multer({ storage: storage }).single('image');
+const cloudinary = require('../services/cloudinary');
 
 controller.listAll = (req, res) => {
-    // res.send("Si jala el customer list");
-    req.getConnection((err, conn) => {
-        conn.query('SELECT * FROM games WHERE type = 1', (err, games) => {
-            if(err){
-                res.send("Hubo un error");
-            }
-            console.log(games);
-            res.json(games);
+  // res.send("Si jala el customer list");
+  function listAll(){
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, conn) => {
+        conn.query('SELECT * FROM games WHERE type = 1', (err, rows) => {
+          if(err){
+            reject(err);
+          }else{
+            resolve(rows);
+          }
         });
-    });;
+      });
+    });
+  }
+  listAll().then(rows=>{
+    res.status(200).json(rows);
+  }).catch(err=>{
+    res.status(500).send({
+      success: false,
+      message: "Hubo un error",
+      error: [err]
+    });
+    throw err;
+  });
 };
 
 controller.listDataTable = (req, res) => {
-  serachPattern = req.body.search.value;
-  req.getConnection((err, conn) => {
-    const query = conn.query(
-    'SELECT * FROM games WHERE name LIKE ? AND type = 1', 
-    [`%${serachPattern}%`], 
-    (err, resp) => {
-        if(err){
-            res.send("Hubo un error");
-        }
-        res.json(resp);
+  const serachPattern = req.body.search.value;
+  function dataTables(){
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, conn) => {
+        const query = conn.query(
+        'SELECT * FROM games WHERE name LIKE ? AND type = 1', 
+        [`%${serachPattern}%`], 
+        (err, rows) => {
+          if (err) {
+            reject(err);
+          }else{
+            resolve(rows);
+          }
+        });
+      });
     });
+  }
+  dataTables().then((rows)=>{
+    res.status(200).json(rows);
+  }).catch(err=>{
+    res.status(500).send({
+      success: false,
+      message: "There was an error",
+      error: err
+    });
+    throw err;
   });
 };
 
@@ -80,112 +110,222 @@ controller.listPerCategory = (req, res) => {
 };
 
 controller.create = (req, res) => {
-  upload(req, res, function (err) {
-    console.log(req.body);
-    let data = req.body;
-    if (err) {
-        res.status(500).send({
-            message: 'La info no fue actulizada con exito'
-          });
-    }else{
-      if(req.file){
-        const fileName = req.file.filename;
-        data.image = fileName;
-      }else{
-        data.image = "No seteado...";
-      }
-      req.getConnection((err, conn) => {
-          const query = conn.query('INSERT INTO games SET ?', [data], (err, rows) => {
-            if(err){
-              console.log(err);
-            }else{
-              res.status(200).send({
-                message: 'La into fue creada con exito'
+  function create(){
+    return new Promise((resolve, reject)=>{
+      upload(req, res, async function (err) {
+        console.log(req.body);
+        let data = req.body;
+        if (err) {
+          reject(err);
+        }else{
+          if(req.file){
+            const file = req.file;
+            const { path } = file;
+            const newPath = await uploader(path);
+            fs.unlinkSync(path);
+            console.log('New path: ', newPath);
+            data.image = newPath.url;
+          }else{
+            data.image = "No seteado...";
+          }
+          req.getConnection((err, conn) => {
+              const query = conn.query('INSERT INTO games SET ?',
+              [data],
+              (err, rows) => {
+                if(err){
+                  reject(err);
+                }else{
+                  resolve(rows);
+                }
               });
-            }
           });
+        }
       });
-    }
+    });
+  }
+  create().then(rows=>{
+    res.status(200).send({
+      sucess: true,
+      message: "La into fue creada con exito",
+      data: [rows]
+    });
+  }).catch(err=>{
+    res.status(500).send({
+      success: false,
+      message: "There was an error",
+      error: [err]
+    });
+    throw err;
   });
 };
 
 controller.listOne = (req, res) => {
   const { id } = req.params;
-  req.getConnection((err, conn) => {
-    conn.query("SELECT * FROM games WHERE id = ?", [id], (err, rows) => {
-    //   res.render('customers_edit', {
-    //     data: rows[0]
-    //   })
-    console.log(rows);
-    res.json(rows);
+  function listOne(){
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, conn) => {
+        conn.query("SELECT * FROM games WHERE id = ?",
+        [id],
+        (err, rows) => {
+          if(err){
+            reject(err);
+          }else{
+            resolve(rows);
+          }
+        });
+      });
     });
+  }
+  listOne().then(rows=>{
+    res.status(200).json(rows);
+  }).catch(err=>{
+    res.status(500).send({
+      success: false,
+      message: "Hubo un error",
+      error: [err]
+    });
+    throw err;
   });
 };
 
 controller.edit = (req, res) => {
   const { id } = req.params;
-  const newCustomer = req.body;
-  req.getConnection((err, conn) => {
-    conn.query('UPDATE games set ? where id = ?', [newCustomer, id], (err, rows) => {
-      res.redirect('/');
+  const newData = req.body;
+  function update(){
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, conn) => {
+        conn.query('UPDATE games set ? where id = ?',
+        [newData, id],
+        (err, rows) => {
+          if (err) {
+            reject(err);
+          }else{
+            resolve(rows);
+          }
+        });
+      });
     });
+  }
+  update().then(rows=>{
+    res.status(200).send({
+      success: true,
+      message: 'There wasnt any errors',
+      data: [rows]
+    });
+  }).catch(err=>{
+    res.status(500).send({
+      success: false,
+      message: 'There was an error',
+      error: [err]
+    });
+    throw err;
   });
 };
 
 controller.delete = (req, res) => {
-    const { id } = req.params;
-    req.getConnection((err, connection) => {
-      connection.query('DELETE FROM games WHERE id = ?', [id], (err, rows) => {
-        if(err){
-          res.status(500).send({
-            success: false,
-            message: "Hubo un error"
-          });
-        }else{
-          res.status(200).send({
-            success: true,
-            message: "El juego fue borrado con exito",
-            rows: rows
-          })
-        }
+  const { id } = req.params;
+  function deleteItem(){
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, connection) => {
+        connection.query('SELECT * FROM games WHERE id = ?', [id], async (error, response)=>{
+          const destroyer = async(id) => await cloudinary.delete(id);
+          var imageToDelete = response[0].image;
+          imageToDelete = imageToDelete.split('/');
+          let lastIndex = imageToDelete.length;
+          var imageName = imageToDelete[lastIndex-1];
+          var imageId = imageName.split('.');
+          imageToDeleteId = imageToDelete[lastIndex-2] +"/"+ imageId[0];
+          console.log("Image to delete: ", imageToDeleteId);
+          let deletedImage = await destroyer(imageToDeleteId);
+          console.log("Deleted image: ", deletedImage);
+        });
+        connection.query('DELETE FROM games WHERE id = ?',
+        [id],
+        (err, rows) => {
+          if (err) {
+            reject(err);
+          }else{
+            resolve(rows);
+          }
+        });
       });
     });
+  }
+  deleteItem().then(rows=>{
+    res.status(200).send({
+      success:true,
+      message: "There wasnt any errors",
+      rows: [rows]
+    });  
+  }).catch(err=>{
+    res.status(500).send({
+      success: false,
+      message: "Hubo un error",
+      error: [err]
+    });
+    throw err;
+  });
 };
 
 controller.uploadImage = (req, res) => {
   const id = req.params.id;
-    upload(req, res, function (err) {
+  function uploadImage(){
+    return new Promise((resolve, reject)=>{
+      upload(req, res, async function (err) {
+        const uploader = async (path) => await cloudinary.uploads(path, 'events');
         if (err) {
-            res.status(500).send({
-                message: 'La foto no fue actulizada con exito'
-              });
+          reject(err);
         }
         // Everything went fine
-        const fileName = req.file.filename;
+        const file = req.file;
+        const { path } = file;
+        const newPath = await uploader(path);
+        fs.unlinkSync(path);
+        console.log('New path: ', newPath);
         req.getConnection((err, conn) => {
-            const query = conn.query('UPDATE games SET image = ? WHERE id = ?', [fileName, id], (err, rows) => {
-              res.status(200).send({
-                message: 'La foto fue actulizada con exito'
-              });
-            });
+          const query = conn.query('UPDATE games SET image = ? WHERE id = ?',
+          [newPath.url, id],
+          (err, rows) => {
+            if (err) {
+              reject(err);
+            }else{
+              resolve(rows);
+            }
+          });
         });
-    })
-};
-
-controller.getImage = (req, res) => {
-  const fileName = req.params.fileName;
-  var filePath = 'src/uploads/games/' + fileName;
-  console.log(filePath);
-  fs.exists(filePath, (exists)=>{
-    if(exists){
-      console.log(path.resolve(filePath));
-      res.sendFile(path.resolve(filePath));
-    }else{
-      res.send({
-        message: 'no existe'
-      })
-    }
+      });
+    });
+  }
+  uploadImage().then(rows=>{
+    res.status(200).send({
+      success: true, 
+      message: "There wasnt any errors",
+      data: [rows]
+    });
+  }).catch(err=>{
+    res.status(500).send({
+      success: false, 
+      message: "There was an error",
+      error: [err]
+    });
+    throw err;
   });
 };
+
+// controller.getImage = (req, res) => {
+//   const fileName = req.params.fileName;
+//   var filePath = 'src/uploads/games/' + fileName;
+//   console.log(filePath);
+//   fs.exists(filePath, (exists)=>{
+//     if(exists){
+//       console.log(path.resolve(filePath));
+//       res.sendFile(path.resolve(filePath));
+//     }else{
+//       res.send({
+//         message: 'no existe'
+//       })
+//     }
+//   });
+// };
 
 module.exports = controller;
