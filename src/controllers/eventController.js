@@ -219,6 +219,7 @@ controller.uploadImage = (req, res) => {
   function uploadImage(){
     return new Promise((resolve, reject)=>{
       upload(req, res, async function (err) {
+        const uploader = async (path) => await cloudinary.uploads(path, 'events');
         if (err) {
           reject(err);
         }
