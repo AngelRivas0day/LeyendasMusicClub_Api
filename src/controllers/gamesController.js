@@ -113,6 +113,7 @@ controller.create = (req, res) => {
   function create(){
     return new Promise((resolve, reject)=>{
       upload(req, res, async function (err) {
+        const uploader = async (path) => await cloudinary.uploads(path, 'boardgames');
         console.log(req.body);
         let data = req.body;
         if (err) {
@@ -274,7 +275,7 @@ controller.uploadImage = (req, res) => {
   function uploadImage(){
     return new Promise((resolve, reject)=>{
       upload(req, res, async function (err) {
-        const uploader = async (path) => await cloudinary.uploads(path, 'events');
+        const uploader = async (path) => await cloudinary.uploads(path, 'boardgames');
         if (err) {
           reject(err);
         }
