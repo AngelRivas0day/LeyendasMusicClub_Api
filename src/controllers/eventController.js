@@ -188,14 +188,14 @@ controller.delete = (req, res) => {
             //         console.log("Se borro la foto");
             //     }
             // });
-            const destroyer = async(id) => await cloudinary.uploader.destroy(id);
+            // const destroyer = async(id) => await cloudinary.uploader.destroy(id);
             imageToDelete = imageToDelete.split('/');
             let lastIndex = imageToDelete.length;
             var imageName = imageToDelete[lastIndex-1];
             var imageId = imageName.split('.');
             imageToDeleteId = imageToDelete[lastIndex-2] +"/"+ imageId[0];
             console.log("Image to delete: ", imageToDeleteId);
-            let deletedImage = destroyer(imageToDeleteId);
+            let deletedImage = await cloudinary.uploader.destroy(imageToDeleteId);
             console.log("Deleted image: ", deletedImage);
           });
           connection.query('DELETE FROM events WHERE id = ?', [id], (err, rows) => {
