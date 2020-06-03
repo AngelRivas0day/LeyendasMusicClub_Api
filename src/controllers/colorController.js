@@ -121,45 +121,69 @@ controller.listOne = (req, res) => {
 
 controller.edit = (req, res) => {
   const { id } = req.params;
-  const data = req.body;
-  req.getConnection((err, conn) => {
-    conn.query('UPDATE colors set ? where id = ?', [data, id], (err, rows) => {
-        if(err){
-            res.status(500).send({
-                success: false,
-                message: "El color no fue creado",
-                error: err
-            });
-        }else{
-            res.status(200).send({
-                success: true,
-                message: "El color fue creado",
-                data: rows
-            });
-        }
-    });
-  });
+	const data = req.body;
+	function update(){
+		return new Promise((resolve, reject)=>{
+			req.getConnection((err, conn) => {
+				conn.query('UPDATE colors set ? where id = ?', 
+				[data, id], 
+				(err, rows) => {
+					if(err){
+						reject(err);
+					}else{
+						resolve(rows);
+					}
+				});
+			});
+		});
+	}
+	update().then(rows=>{
+		res.status(200).send({
+			success: true,
+			message: "Theres no errors",
+			data: [rows]
+		});
+	}).catch(err=>{
+		res.status(500).send({
+			success: false,
+			message: "There was an error",
+			error: [err]
+		});
+		throw err;
+	});
 };
 
 controller.delete = (req, res) => {
-    const { id } = req.params;
-    req.getConnection((err, connection) => {
-      connection.query('DELETE FROM colors WHERE id = ?', [id], (err, rows) => {
-        if(err){
-            res.status(500).send({
-                success: false,
-                message: "El color no fue eliminado",
-                error: err
-            });
-        }else{
-            res.status(200).send({
-                success: true,
-                message: "El color fue eliminado",
-                data: rows
-            });
-        }
-      });
-    });
+	const { id } = req.params;
+	function deleteItem(){
+		return new Promise((resolve, reject)=>{
+			req.getConnection((err, connection) => {
+				connection.query('DELETE FROM colors WHERE id = ?', 
+				[id], 
+				(err, rows) => {
+					if(err){
+						reject(err);
+					}else{
+						resolve(rows);
+					}
+				});
+			});
+		});
+	}
+	deleteItem().then(rows=>{
+		res.status(200).send({
+			success: true,
+			message: "Theres no errors",
+			data: [rows]
+		});
+	}).catch(err=>{
+		res.status(500).send({
+			success: false,
+			message: "There was an error",
+			error: [err]
+		});
+		throw err;
+	});
 };
 
 module.exports = controller;
