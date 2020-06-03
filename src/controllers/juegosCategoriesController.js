@@ -4,30 +4,58 @@ const path = require('path');
 const controller = {};
 
 controller.listAll = (req, res) => {
-    // res.send("Si jala el customer list");
-    req.getConnection((err, conn) => {
-        conn.query('SELECT * FROM gameCategories WHERE type = 0', (err, gameCategories) => {
-            if(err){
-                res.send("Hubo un error");
-            }
-            console.log(gameCategories);
-            res.json(gameCategories);
+  function listAll(){
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, conn) => {
+        conn.query('SELECT * FROM gameCategories WHERE type = 0', (err, rows) => {
+          if(err){
+            reject(err);
+          }else{
+            resolve(rows);
+          }
         });
-    });;
+      });
+    });
+  }
+  listAll().then(rows=>{
+    res.status(200).json(rows);
+  }).catch(err=>{
+    res.status(500).send({
+      success: false,
+      message: 'There was an error',
+      error: [err]
+    });
+    throw err;
+  });
 };
 
 controller.listDataTable = (req, res) => {
-  serachPattern = req.body.search.value;
-  req.getConnection((err, conn) => {
-    const query = conn.query(
-    'SELECT * FROM gameCategories WHERE name LIKE ? AND type = 1', 
-    [`%${serachPattern}%`], 
-    (err, resp) => {
-        if(err){
-            res.send("Hubo un error");
-        }
-        res.json(resp);
+  const serachPattern = req.body.search.value;
+  function dataTables(){
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, conn) => {
+        const query = conn.query(
+        'SELECT * FROM gameCategories WHERE name LIKE ? AND type = 0', 
+        [`%${serachPattern}%`], 
+        (err, resp) => {
+          if(err){
+            reject(err);
+          }else{
+            resolve(rows);
+          }
+        });
+      });
     });
+  }
+  dataTables().then(rows=>{
+    res.status(200).json(rows);
+  }).catch(err=>{
+    res.status(500).send({
+      success: false,
+      message: 'There was an error',
+      error: [err]
+    });
+    throw err;
   });
 };
 

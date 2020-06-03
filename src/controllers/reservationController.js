@@ -35,11 +35,11 @@ controller.listDataTable = (req, res) => {
       'SELECT * FROM reservations WHERE name LIKE ? AND archived = 0', 
       [`%${serachPattern}%`], 
       (err, resp) => {
-          if(err){
-            reject(err);
-          }else{
-            resolve(resp);
-          }
+        if(err){
+          reject(err);
+        }else{
+          resolve(resp);
+        }
       });
     });
   }

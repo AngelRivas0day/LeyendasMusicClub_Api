@@ -11,6 +11,6 @@ router.get('/list/:id', machineController.listOne);
 router.put('/update/:id', md_auth.ensureAuth, machineController.edit);
 router.delete('/delete/:id', md_auth.ensureAuth, machineController.delete);
 router.put('/update-image/:id', md_auth.ensureAuth, machineController.uploadImage);
-router.get('/get-image/:fileName', machineController.getImage);
+// router.get('/get-image/:fileName', machineController.getImage);
 
 module.exports = router;
