@@ -272,6 +272,7 @@ controller.delete = (req, res) => {
 
 controller.uploadImage = (req, res) => {
   const id = req.params.id;
+  var newPath;
   function uploadImg(){
     return new Promise((resolve, reject)=>{
       upload(req, res, async function (err) {
@@ -284,11 +285,11 @@ controller.uploadImage = (req, res) => {
         if(req.file){
           const file = req.file;
           const { path } = file;
-          const newPath = await uploader(path);
+          newPath = await uploader(path);
           fs.unlinkSync(path);
           console.log('New path: ', newPath);
         }else{
-          let newPath = "No seteado...";
+          newPath.url = "No seteado...";
         }
         req.getConnection((err, conn) => {
           const query = conn.query('UPDATE games SET image = ? WHERE id = ?',
