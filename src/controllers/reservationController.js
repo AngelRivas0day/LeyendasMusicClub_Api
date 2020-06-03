@@ -3,7 +3,7 @@ const controller = {};
 controller.listAll = (req, res) => {
     // res.send("Si jala el customer list");
     req.getConnection((err, conn) => {
-        conn.query('SELECT * FROM reservations WHERE achieved = 0', (err, resp) => {
+        conn.query('SELECT * FROM reservations WHERE archived = 0', (err, resp) => {
             if(err){
                 res.send("Hubo un error");
             }
