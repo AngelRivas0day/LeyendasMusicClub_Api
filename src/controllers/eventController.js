@@ -51,6 +51,7 @@ controller.create = (req, res) => {
           reject(err);
         }else{
           if(req.file){
+            const file = req.file;
             const fileName = req.file.filename;
             const { path } = file;
             const newPath = await uploader(path);
