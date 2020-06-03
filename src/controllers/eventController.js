@@ -179,8 +179,8 @@ controller.delete = (req, res) => {
     function deleteItem(){
       return new Promise((resolve, reject)=>{
         req.getConnection((err, connection) => {
-          connection.query('SELECT * FROM events WHERE id = ?', [id], (error, response)=>{
-            const imageToDelete = response[0].image;
+          connection.query('SELECT * FROM events WHERE id = ?', [id], async (error, response)=>{
+            var imageToDelete = response[0].image;
             // fs.unlink(`${path}/${imageToDelete}`, (err)=>{
             //     if(err){
             //         console.log(err);
@@ -188,6 +188,15 @@ controller.delete = (req, res) => {
             //         console.log("Se borro la foto");
             //     }
             // });
+            const destroyer = async(id) => await cloudinary.uploader.destroy(id);
+            imageToDelete = imageToDelete.split('/');
+            let lastIndex = imageToDelete.length;
+            var imageName = imageToDelete[lastIndex-1];
+            var imageId = imageName.split('.');
+            imageToDeleteId = imageToDelete[lastIndex-2] +"/"+ imageId[0];
+            console.log("Image to delete: ", imageToDeleteId);
+            let deletedImage = destroyer(imageToDeleteId);
+            console.log("Deleted image: ", deletedImage);
           });
           connection.query('DELETE FROM events WHERE id = ?', [id], (err, rows) => {
             if (err) {
