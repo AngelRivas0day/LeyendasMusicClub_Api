@@ -108,27 +108,35 @@ controller.listPerCategory = (req, res) => {
 };
 
 controller.create = (req, res) => {
-  const data = req.body;
   function create(){
     return new Promise((resolve, reject)=>{
-      upload(req, res, function (err) {
+      upload(req, res, async function (err) {
+        const uploader = async (path) => await cloudinary.uploads(path, 'maquinitas');
+        console.log(req.body);
+        let data = req.body;
         if (err) {
           reject(err);
         }else{
           if(req.file){
-            const fileName = req.file.filename;
-            data.image = fileName;
+            const file = req.file;
+            const { path } = file;
+            const newPath = await uploader(path);
+            fs.unlinkSync(path);
+            console.log('New path: ', newPath);
+            data.image = newPath.url;
           }else{
             data.image = "No seteado...";
           }
           req.getConnection((err, conn) => {
-            const query = conn.query('INSERT INTO games SET ?', [data], (err, rows) => {
-              if(err){
-                reject(err);
-              }else{
-                resolve(rows);
-              }
-            });
+              const query = conn.query('INSERT INTO games SET ?',
+              [data],
+              (err, rows) => {
+                if(err){
+                  reject(err);
+                }else{
+                  resolve(rows);
+                }
+              });
           });
         }
       });
@@ -136,14 +144,14 @@ controller.create = (req, res) => {
   }
   create().then(rows=>{
     res.status(200).send({
-      success: true,
-      message: 'There was no errors',
-      error: [rows]
+      sucess: true,
+      message: "La into fue creada con exito",
+      data: [rows]
     });
   }).catch(err=>{
     res.status(500).send({
       success: false,
-      message: 'There was an error',
+      message: "There was an error",
       error: [err]
     });
     throw err;
@@ -218,10 +226,24 @@ controller.delete = (req, res) => {
   function deleteItem(){
     return new Promise((resolve, reject)=>{
       req.getConnection((err, connection) => {
+        connection.query('SELECT * FROM games WHERE id = ?', 
+        [id], 
+        async (error, response)=>{
+          const destroyer = async(id) => await cloudinary.delete(id);
+          var imageToDelete = response[0].image;
+          imageToDelete = imageToDelete.split('/');
+          let lastIndex = imageToDelete.length;
+          var imageName = imageToDelete[lastIndex-1];
+          var imageId = imageName.split('.');
+          imageToDeleteId = imageToDelete[lastIndex-2] +"/"+ imageId[0];
+          console.log("Image to delete: ", imageToDeleteId);
+          let deletedImage = await destroyer(imageToDeleteId);
+          console.log("Deleted image: ", deletedImage);
+        });
         connection.query('DELETE FROM games WHERE id = ?',
         [id],
         (err, rows) => {
-          if(err){
+          if (err) {
             reject(err);
           }else{
             resolve(rows);
@@ -231,11 +253,15 @@ controller.delete = (req, res) => {
     });
   }
   deleteItem().then(rows=>{
-    res.status(200).json(rows);
+    res.status(200).send({
+      success:true,
+      message: "There wasnt any errors",
+      rows: [rows]
+    });  
   }).catch(err=>{
     res.status(500).send({
       success: false,
-      message: 'There was an error',
+      message: "Hubo un error",
       error: [err]
     });
     throw err;
@@ -244,38 +270,48 @@ controller.delete = (req, res) => {
 
 controller.uploadImage = (req, res) => {
   const id = req.params.id;
-  function uploadImage(){
+  var newPath;
+  function uploadImg(){
     return new Promise((resolve, reject)=>{
-      upload(req, res, function (err) {
+      upload(req, res, async function (err) {
+        const uploader = async (path) => await cloudinary.uploads(path, 'maquinitas');
         if (err) {
           reject(err);
-        }else{
-          const fileName = req.file.filename;
-          req.getConnection((err, conn) => {
-            const query = conn.query('UPDATE games SET image = ? WHERE id = ?',
-            [fileName, id],
-            (err, rows) => {
-              if(err){
-                reject(err);
-              }else{
-                resolve(rows);
-              }
-            });
-          });
         }
+        // Everything went fine
+        if(req.file){
+          const file = req.file;
+          const { path } = file;
+          newPath = await uploader(path);
+          fs.unlinkSync(path);
+          console.log('New path: ', newPath);
+        }else{
+          newPath.url = "No seteado...";
+        }
+        req.getConnection((err, conn) => {
+          const query = conn.query('UPDATE games SET image = ? WHERE id = ?',
+          [newPath.url, id],
+          (err, rows) => {
+            if (err) {
+              reject(err);
+            }else{
+              resolve(rows);
+            }
+          });
+        });
       });
     });
   }
-  uploadImage().then(rows=>{
+  uploadImg().then(rows=>{
     res.status(200).send({
-      success: false,
-      message: 'There was not any error',
+      success: true, 
+      message: "There wasnt any errors",
       data: [rows]
     });
   }).catch(err=>{
     res.status(500).send({
-      success: false,
-      message: 'THere was an error',
+      success: false, 
+      message: "There was an error",
       error: [err]
     });
     throw err;

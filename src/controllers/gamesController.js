@@ -281,7 +281,6 @@ controller.uploadImage = (req, res) => {
           reject(err);
         }
         // Everything went fine
-        console.log("Files: ", req.file);
         if(req.file){
           const file = req.file;
           const { path } = file;
