@@ -128,13 +128,6 @@ controller.edit = (req, res) => {
           if(req.file){
             conn.query('SELECT * FROM events WHERE id = ?', [id], async (error, response)=>{
               let imageToDelete = response[0].image;
-              // fs.unlink(`${path}/${imageToDelete}`, (err)=>{
-              //     if(err){
-              //         console.log(err);
-              //     }else{
-              //         console.log("Se borro la foto");
-              //     }
-              // });
               const destroyer = async(id) => await cloudinary.delete(id);
               imageToDelete = imageToDelete.split('/');
               let lastIndex = imageToDelete.length;

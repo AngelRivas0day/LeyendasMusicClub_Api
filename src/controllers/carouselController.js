@@ -124,49 +124,59 @@ controller.listOne = (req, res) => {
 
 controller.edit = (req, res) => {
   const { id } = req.params;
-  const data = req.body;
-  const path = 'src/uploads/carousel';
-    req.getConnection((err, connection) => {
-        connection.query('SELECT * FROM carousel WHERE id = ?', [id], (error, response)=>{
-            console.log("image:");
-            console.log(response[0].image);
-            const imageToDelete = response[0].image;
-            fs.unlink(`${path}/${imageToDelete}`, (err)=>{
-                if(err){
-                    console.log(err);
-                }else{
-                    console.log("Se borro la foto");
-                }
+  function update(){
+    return new Promise((resolve, reject)=>{
+      upload(req, res, async (err)=>{
+        const uploader = async (path) => await cloudinary.uploads(path, 'carrusel');
+        var data = req.body;
+        req.getConnection(async function(err,conn){
+          if(req.file){
+            conn.query('SELECT * FROM carousel WHERE id = ?', [id], async (error, response)=>{
+              let imageToDelete = response[0].image;
+              const destroyer = async(id) => await cloudinary.delete(id);
+              imageToDelete = imageToDelete.split('/');
+              let lastIndex = imageToDelete.length;
+              var imageName = imageToDelete[lastIndex-1];
+              var imageId = imageName.split('.');
+              imageToDeleteId = imageToDelete[lastIndex-2] +"/"+ imageId[0];
+              console.log("Image to delete: ", imageToDeleteId);
+              let deletedImage = await destroyer(imageToDeleteId);
+              console.log("Deleted image: ", deletedImage);
             });
+            const file = req.file;
+            const { path } = file;
+            const newPath = await uploader(path);
+            fs.unlinkSync(path);
+            console.log('New path: ', newPath);
+            data.image = newPath.url;
+          }
+          conn.query('UPDATE carousel set ? WHERE id = ?', 
+          [data, id], 
+          (err, rows) => {
+            if (err) {
+              reject(err);
+            }else{
+              resolve(rows);
+            }
+          });
         });
+      });
     });
-    multipleUpload(req, res, function (err) {
-        let images = req.files;
-        let fileNames = [];
-        Array.from(images).forEach(image => {
-        console.log(image);
-        fileNames.push(image.filename);
-        });
-        data.image = fileNames[0];
-        data.images = JSON.stringify(fileNames);
-        if (err) {
-            res.status(500).send({
-                message: 'La info no fue actulizada con exito'
-            });
-        }else{
-            req.getConnection((err, conn) => {
-                const query = conn.query('UPDATE carousel set ? where id = ?', [data, id], (err, rows) => {
-                    if(err){
-                        console.log(err);
-                    }else{
-                        res.status(200).send({
-                            message: 'La into fue creada con exito'
-                        });
-                    }
-                });
-            });
-        }
+  }
+  update().then(rows=>{
+    res.status(200).send({
+      success: true,
+      message: 'There wasnt any errors',
+      data: [rows]
     });
+  }).catch(err=>{
+    res.status(500).send({
+      success: false,
+      message: 'There was an error',
+      error: [err]
+    });
+    throw err;
+  });
 };
 
 controller.delete = (req, res) => {
