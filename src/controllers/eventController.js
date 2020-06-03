@@ -45,18 +45,6 @@ controller.create = (req, res) => {
     return new Promise((resolve, reject)=>{
       upload(req, res, async function(err){
         const uploader = async (path) => await cloudinary.uploads(path, 'events');
-        const urls = []
-        const files = req.files;
-        // console.log("Files: ", files);
-        for (const file of files) {
-          const { path } = file;
-          // console.log('File path: ', file.path);
-          const newPath = await uploader(path)
-          urls.push(newPath);
-          console.log('New path: ', newPath);
-          fs.unlinkSync(path)
-        }
-    
         console.log(req.body);
         let data = req.body;
         if (err) {
@@ -64,6 +52,10 @@ controller.create = (req, res) => {
         }else{
           if(req.file){
             const fileName = req.file.filename;
+            const { path } = file;
+            const newPath = await uploader(path);
+            fs.unlinkSync(path);
+            console.log('New path: ', newPath);
             data.image = fileName;
           }else{
             data.image = "No seteado...";
