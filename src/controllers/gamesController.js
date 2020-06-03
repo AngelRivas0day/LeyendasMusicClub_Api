@@ -287,9 +287,8 @@ controller.uploadImage = (req, res) => {
           const newPath = await uploader(path);
           fs.unlinkSync(path);
           console.log('New path: ', newPath);
-          data.image = newPath.url;
         }else{
-          data.image = "No seteado...";
+          let newPath = "No seteado...";
         }
         req.getConnection((err, conn) => {
           const query = conn.query('UPDATE games SET image = ? WHERE id = ?',
