@@ -126,7 +126,7 @@ controller.edit = (req, res) => {
         var data = req.body;
         req.getConnection(async function(err,conn){
           if(req.file){
-            conn.query('SELECT * FROM events WHERE id = ?', [id], (error, response)=>{
+            conn.query('SELECT * FROM events WHERE id = ?', [id], async (error, response)=>{
               let imageToDelete = response[0].image;
               // fs.unlink(`${path}/${imageToDelete}`, (err)=>{
               //     if(err){

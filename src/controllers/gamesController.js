@@ -227,7 +227,9 @@ controller.delete = (req, res) => {
   function deleteItem(){
     return new Promise((resolve, reject)=>{
       req.getConnection((err, connection) => {
-        connection.query('SELECT * FROM games WHERE id = ?', [id], async (error, response)=>{
+        connection.query('SELECT * FROM games WHERE id = ?', 
+        [id], 
+        async (error, response)=>{
           const destroyer = async(id) => await cloudinary.delete(id);
           var imageToDelete = response[0].image;
           imageToDelete = imageToDelete.split('/');
