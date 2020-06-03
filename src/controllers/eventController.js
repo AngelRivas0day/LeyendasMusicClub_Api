@@ -57,7 +57,7 @@ controller.create = (req, res) => {
             const newPath = await uploader(path);
             fs.unlinkSync(path);
             console.log('New path: ', newPath);
-            data.image = fileName;
+            data.image = newPath;
           }else{
             data.image = "No seteado...";
           }
