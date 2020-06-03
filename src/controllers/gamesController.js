@@ -280,9 +280,9 @@ controller.uploadImage = (req, res) => {
           reject(err);
         }
         // Everything went fine
-        console.log("Files: ", req.files);
-        if(req.files){
-          const file = req.files[0];
+        console.log("Files: ", req.file);
+        if(req.file){
+          const file = req.file;
           const { path } = file;
           const newPath = await uploader(path);
           fs.unlinkSync(path);
