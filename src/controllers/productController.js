@@ -88,13 +88,7 @@ controller.listDataTable = (req, res) => {
           (err, resp) => {
             if (err) {
               reject(err);
-              // res.status(500).send({
-              //   success: false,
-              //   message: "There was an error",
-              //   error: err
-              // });
             }else{
-              // res.status(200).json(resp);
               resolve(resp);
             }
           }
@@ -120,7 +114,7 @@ controller.create = (req, res) => {
   function create(){
     return new Promise((resolve, reject)=>{
       multipleUpload(req, res, async function (err) {
-        const uploader = async (path) => await cloudinary.uploads(path, 'images');
+        const uploader = async (path) => await cloudinary.uploads(path, 'products');
         const urls = []
         const files = req.files;
         // console.log("Files: ", files);

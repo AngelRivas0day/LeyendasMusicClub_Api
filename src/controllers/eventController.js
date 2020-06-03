@@ -10,76 +10,118 @@ var storage = multer.diskStorage({
     }
 });
 var upload = multer({ storage: storage }).single('image');
+const cloudinary = require('../services/cloudinary');
 
 const controller = {};
 
 controller.listAll = (req, res) => {
-  req.getConnection((err, conn) => {
-    conn.query('SELECT * FROM events', (err, rows) => {
-      if(err){
-        res.status(500).send({
-          success: false,
-          message: "Hubo un error",
-          error: err
+  function listAll(){
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, conn) => {
+        conn.query('SELECT * FROM events', (err, rows) => {
+          if(err){
+            reject(err);
+          }else{
+            resolve(rows);
+          }
         });
-      }else{
-        res.status(200).json(rows);
-      }
+      });
     });
-  });;
+  }
+  listAll().then(rows=>{
+    res.status(200).json(rows);
+  }).catch(err=>{
+    res.status(500).send({
+      success: false,
+      message: "Hubo un error",
+      error: [err]
+    });
+    throw err;
+  });
 };
 
 controller.create = (req, res) => {
-  upload(req, res, function (err) {
-    console.log(req.body);
-    let data = req.body;
-    if (err) {
-        res.status(500).send({
-            message: 'La info no fue actulizada con exito'
-          });
-    }else{
-      if(req.file){
-        const fileName = req.file.filename;
-        data.image = fileName;
-      }else{
-        data.image = "No seteado...";
-      }
-      req.getConnection((err, conn) => {
-          const query = conn.query('INSERT INTO events SET ?', [data], (err, rows) => {
-            if(err){
-              console.log(err);
-              res.status(500).send({
-                success: false,
-                message: "El evento no fue creado",
-                data: rows
+  function create(){
+    return new Promise((resolve, reject)=>{
+      upload(req, res, async function(err){
+        const uploader = async (path) => await cloudinary.uploads(path, 'events');
+        const urls = []
+        const files = req.files;
+        // console.log("Files: ", files);
+        for (const file of files) {
+          const { path } = file;
+          // console.log('File path: ', file.path);
+          const newPath = await uploader(path)
+          urls.push(newPath);
+          console.log('New path: ', newPath);
+          fs.unlinkSync(path)
+        }
+    
+        console.log(req.body);
+        let data = req.body;
+        if (err) {
+          reject(err);
+        }else{
+          if(req.file){
+            const fileName = req.file.filename;
+            data.image = fileName;
+          }else{
+            data.image = "No seteado...";
+          }
+          req.getConnection((err, conn) => {
+              const query = conn.query('INSERT INTO events SET ?', [data], (err, rows) => {
+                if(err){
+                  console.log(err);
+                  reject(err);
+                }else{
+                  resolve(rows);
+                }
               });
-            }else{
-              res.status(200).send({
-                success: true,
-                message: "El evento fue creado",
-                data: rows
-              });
-            }
           });
+        }
       });
-    }
+    });
+  }
+  create().then(rows=>{
+    res.status(200).send({
+      success: true,
+      message: 'There wasnt any errors',
+      data: [rows]
+    });
+  }).catch(err=>{
+    res.status(500).send({
+      success: false,
+      message: "Hubo un error",
+      error: [err]
+    });
+    throw err;
   });
 };
 
 controller.listOne = (req, res) => {
   const { id } = req.params;
-  req.getConnection((err, conn) => {
-    conn.query("SELECT * FROM events WHERE id = ?", [id], (err, rows) => {
-      if(err){
-        res.status(500).send({
-          success: false,
-          message: "Hubo un error",
-          error: err
+  function listOne(){
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, conn) => {
+        conn.query("SELECT * FROM events WHERE id = ?", [id], (err, rows) => {
+          if(err){
+            reject(err);
+          }else{
+            resolve(rows[0]);
+          }
         });
-      }else{
-        res.status(200).json(rows[0]);
-      }
+      });
     });
+  }
+  listOne().then(rows=>{
+    res.status(200).json(rows);
+  }).catch(err=>{
+    res.status(500).send({
+      success: false,
+      message: "Hubo un error",
+      error: [err]
+    });
+    throw err;
   });
 };
 
@@ -183,20 +225,20 @@ controller.uploadImage = (req, res) => {
     })
 };
 
-controller.getImage = (req, res) => {
-  const fileName = req.params.fileName;
-  var filePath = 'src/uploads/events/' + fileName;
-  console.log(filePath);
-  fs.exists(filePath, (exists)=>{
-    if(exists){
-      console.log(path.resolve(filePath));
-      res.sendFile(path.resolve(filePath));
-    }else{
-      res.send({
-        message: 'no existe'
-      })
-    }
-  });
-};
+// controller.getImage = (req, res) => {
+//   const fileName = req.params.fileName;
+//   var filePath = 'src/uploads/events/' + fileName;
+//   console.log(filePath);
+//   fs.exists(filePath, (exists)=>{
+//     if(exists){
+//       console.log(path.resolve(filePath));
+//       res.sendFile(path.resolve(filePath));
+//     }else{
+//       res.send({
+//         message: 'no existe'
+//       })
+//     }
+//   });
+// };
 
 module.exports = controller;

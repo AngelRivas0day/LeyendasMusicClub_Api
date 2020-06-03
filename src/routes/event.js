@@ -9,6 +9,6 @@ router.get('/list/:id', eventController.listOne);
 router.put('/update/:id', eventController.edit);
 router.delete('/delete/:id', eventController.delete);
 router.post('/update-image/:id', eventController.uploadImage);
-router.get('/get-image/:fileName', eventController.getImage);
+// router.get('/get-image/:fileName', eventController.getImage);
 
 module.exports = router;
