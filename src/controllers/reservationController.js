@@ -17,7 +17,7 @@ controller.listDataTable = (req, res) => {
   serachPattern = req.body.search.value;
   req.getConnection((err, conn) => {
     const query = conn.query(
-    'SELECT * FROM reservations WHERE name LIKE ? AND achieved = 0', 
+    'SELECT * FROM reservations WHERE name LIKE ? AND archived = 0', 
     [`%${serachPattern}%`], 
     (err, resp) => {
         if(err){
