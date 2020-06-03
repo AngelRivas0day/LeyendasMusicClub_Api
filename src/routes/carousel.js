@@ -10,6 +10,6 @@ router.post('/create', carouselController.create);
 router.put('/update/:id', carouselController.edit);
 router.delete('/delete/:id', carouselController.delete);
 router.put('/update-image/:id', md_auth.ensureAuth, carouselController.uploadImage);
-router.get('/get-image/:fileName', carouselController.getImage);
+// router.get('/get-image/:fileName', carouselController.getImage);
 
 module.exports = router;

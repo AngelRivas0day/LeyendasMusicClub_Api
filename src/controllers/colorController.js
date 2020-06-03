@@ -35,7 +35,7 @@ controller.listDataTable = (req, res) => {
 				const query = conn.query(
 				'SELECT * FROM colors WHERE name LIKE ?', 
 					[`%${serachPattern}%`], 
-					(err, resp) => {
+					(err, rows) => {
 						if(err){
 							reject(err);
 						}else{
@@ -58,41 +58,65 @@ controller.listDataTable = (req, res) => {
 };
 
 controller.create = (req, res) => {
-    const data = req.body;
-    req.getConnection((err, conn) => {
-        const query = conn.query('INSERT INTO colors SET ?', [data], (err, rows) => {
-            if(err){
-                res.status(500).send({
-                    success: false,
-                    message: "El color no fue creado",
-                    error: err
-                });
-            }else{
-                res.status(200).send({
-                    success: true,
-                    message: "El color fue creado",
-                    data: rows
-                });
-            }
+	const data = req.body;
+	function create(){
+		return new Promise((resolve, reject)=>{
+			req.getConnection((err, conn) => {
+				const query = conn.query('INSERT INTO colors SET ?', 
+				[data],
+				(err, rows) => {
+					if(err){
+						reject(err);
+					}else{
+						resolve(rows);
+					}
         });
-    });
+    	});
+		});
+	}
+	create().then(rows=>{
+		res.status(200).send({
+			success: true,
+			message: 'There is no errors',
+			data: [rows]
+		});
+	}).catch(err=>{
+		res.status(500).send({
+			success: false,
+			message: 'There was an error',
+			error: [err]
+		});
+		throw err;
+	});
 };
 
 controller.listOne = (req, res) => {
-  const { id } = req.params;
-  req.getConnection((err, conn) => {
-    conn.query("SELECT * FROM colors WHERE id = ?", [id], (err, rows) => {
-        if(err){
-            res.status(500).send({
-                success: false,
-                message: "El color no pudo ser listado",
-                error: err
-            });
-        }else{
-            res.status(200).json(rows);
-        }
-    });
-  });
+	const { id } = req.params;
+	function listOne(){
+		return new Promise((resolve, reject)=>{
+			req.getConnection((err, conn) => {
+				conn.query("SELECT * FROM colors WHERE id = ?", 
+				[id], 
+				(err, rows) => {
+					if(err){
+						reject(err);
+					}else{
+						resolve(rows);
+					}
+				});
+			});
+		});
+	}
+	listOne().then(rows=>{
+		res.status(200).json(rows);
+	}).catch(err=>{
+		res.status(500).send({
+			success: false,
+			message: 'There was an error',
+			error: [err]
+		});
+		throw err;
+	});
 };
 
 controller.edit = (req, res) => {
