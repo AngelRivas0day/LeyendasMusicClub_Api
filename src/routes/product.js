@@ -11,6 +11,6 @@ router.get('/list/:id', productController.getOne);
 router.put('/update/:id', md_auth.ensureAuth, productController.update);
 router.delete('/delete/:id', md_auth.ensureAuth, productController.delete);
 router.post('/update-image/:id', md_auth.ensureAuth, productController.uploadImage);
-router.get('/get-image/:fileName', productController.getImage);
+// router.get('/get-image/:fileName', productController.getImage);
 
 module.exports = router;

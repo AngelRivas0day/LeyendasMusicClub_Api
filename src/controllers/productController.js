@@ -77,86 +77,110 @@ controller.listNewItems = (req, res) => {
 };
 
 controller.listDataTable = (req, res) => {
-  serachPattern = req.body.search.value;
-  req.getConnection((err, conn) => {
-    const query = conn.query(
-      "SELECT * FROM products WHERE name LIKE ?",
-      [`%${serachPattern}%`],
-      (err, resp) => {
-        if (err) {
-          res.status(500).send({
-            success: false,
-            message: "There was an error",
-            error: err
-          });
-        }else{
-          res.status(200).json(resp);
-        }
-      }
-    );
-  });
-};
 
-controller.create = (req, res) => {
-  multipleUpload(req, res, async function (err) {
-
-
-    const uploader = async (path) => await cloudinary.uploads(path, 'images');
-    const urls = []
-    const files = req.files;
-    // console.log("Files: ", files);
-    for (const file of files) {
-      const { path } = file;
-      // console.log('File path: ', file.path);
-      const newPath = await uploader(path)
-      urls.push(newPath);
-      console.log('New path: ', newPath);
-      fs.unlinkSync(path)
-    }
-
-
-
-    var data = req.body;
-    let images = req.files;
-    let fileNames = {};
-    var imageIndex = 0;
-    // console.log("body:", data);
-    // console.log("Images:", images.length);
-    let colors = JSON.parse(data.colors);
-    // console.log("Colors",colors);
-    Array.from(colors).forEach((color, i)=>{
-      fileNames[color.name] = [urls[imageIndex].url,urls[imageIndex+1].url,urls[imageIndex+2].url];
-      imageIndex = imageIndex + 3;
-    });
-    data.image = urls[0].url;
-    data.images = JSON.stringify(fileNames);
-    if (err) {
-      res.status(500).send({
-        message: "La info no fue actulizada con exito",
-      });
-    } else {
+  function dataTables(){
+    return new Promise((resolve, reject)=>{
+      serachPattern = req.body.search.value;
       req.getConnection((err, conn) => {
         const query = conn.query(
-          "INSERT INTO products SET ?",
-          [data],
-          (err, rows) => {
+          "SELECT * FROM products WHERE name LIKE ?",
+          [`%${serachPattern}%`],
+          (err, resp) => {
             if (err) {
-              res.status(500).send({
-                success: false,
-                message: "There was an error",
-                error: err
-              })
-            } else {
-              res.status(200).send({
-                sucess: true,
-                message: "La into fue creada con exito",
-                data: rows
-              });
+              reject(err);
+              // res.status(500).send({
+              //   success: false,
+              //   message: "There was an error",
+              //   error: err
+              // });
+            }else{
+              // res.status(200).json(resp);
+              resolve(resp);
             }
           }
         );
       });
-    }
+    });
+  }
+
+  dataTables().then((rows)=>{
+    res.status(200).json(rows);
+  }).catch(err=>{
+    res.status(500).send({
+      success: false,
+      message: "There was an error",
+      error: err
+    });
+    throw err;
+  });
+  
+};
+
+controller.create = (req, res) => {
+  function create(){
+    return new Promise((resolve, reject)=>{
+      multipleUpload(req, res, async function (err) {
+        const uploader = async (path) => await cloudinary.uploads(path, 'images');
+        const urls = []
+        const files = req.files;
+        // console.log("Files: ", files);
+        for (const file of files) {
+          const { path } = file;
+          // console.log('File path: ', file.path);
+          const newPath = await uploader(path)
+          urls.push(newPath);
+          console.log('New path: ', newPath);
+          fs.unlinkSync(path)
+        }
+        var data = req.body;
+        let images = req.files;
+        let fileNames = {};
+        var imageIndex = 0;
+        // console.log("body:", data);
+        // console.log("Images:", images.length);
+        let colors = JSON.parse(data.colors);
+        // console.log("Colors",colors);
+        Array.from(colors).forEach((color, i)=>{
+          fileNames[color.name] = [urls[imageIndex].url,urls[imageIndex+1].url,urls[imageIndex+2].url];
+          imageIndex = imageIndex + 3;
+        });
+        data.image = urls[0].url;
+        data.images = JSON.stringify(fileNames);
+        if (err) {
+          res.status(500).send({
+            message: "La info no fue actulizada con exito",
+          });
+        } else {
+          req.getConnection((err, conn) => {
+            const query = conn.query(
+              "INSERT INTO products SET ?",
+              [data],
+              (err, rows) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(rows);
+                }
+              }
+            );
+          });
+        }
+      });
+    });
+  }
+  create().then(rows=>{
+    res.status(200).send({
+      sucess: true,
+      message: "La into fue creada con exito",
+      data: [rows]
+    });
+  }).catch(err=>{
+    res.status(500).send({
+      success: false,
+      message: "There was an error",
+      error: [err]
+    });
+    throw err;
   });
 };
 
@@ -200,46 +224,77 @@ controller.getOne = (req, res, next)=>{
 };
 
 controller.update = (req, res) => {
+
   const { id } = req.params;
   const newData = req.body;
+  function update(){
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, conn) => {
+        conn.query(
+          "UPDATE products set ? where id = ?",
+          [newData, id],
+          (err, rows) => {
+            if (err) {
+              // res.status(500).send({
+              //   success: false,
+              //   message: "Hubo un error al actualizar la información",
+              //   error: err,
+              // });
+              reject(err);
+            } else {
+              // res.status(200).send({
+              //   success: true,
+              //   message: "ok",
+              // });
+              resolve(rows);
+            }
+          }
+        );
+      });
+    });
+  }
 
-  // console.log(newData);
-  req.getConnection((err, conn) => {
-    conn.query(
-      "UPDATE products set ? where id = ?",
-      [newData, id],
-      (err, rows) => {
-        if (err) {
-          res.status(500).send({
-            success: false,
-            message: "Hubo un error al actualizar la información",
-            error: err,
-          });
-        } else {
-          res.status(200).send({
-            success: true,
-            message: "ok",
-          });
-        }
-      }
-    );
+  update().then((rows)=>{
+    res.status(200).send({
+      success: true,
+      message: "ok",
+    });
+  }).catch((err)=>{
+    res.status(500).send({
+      success: false,
+      message: "Hubo un error al actualizar la información",
+      error: err,
+    });
   });
 };
 
 controller.delete = (req, res) => {
   const { id } = req.params;
-  req.getConnection((err, connection) => {
-    const query = connection.query(
-      "DELETE FROM products WHERE id = ?",
-      [id],
-      (err, rows) => {
-        res.status(200).send({
-          success: true,
-          message: "El producto se ha eliminado",
-          rows: rows,
-        });
-      }
-    );
+  function deleteItem(){
+    return new Promise((resolve, reject)=>{
+      req.getConnection((err, connection) => {
+        const query = connection.query(
+          "DELETE FROM products WHERE id = ?",
+          [id],
+          (err, rows) => {
+            if(err){
+              reject(err);
+            }else{
+              resolve(rows);
+            }
+          }
+        );
+      });
+    });
+  }
+  deleteItem().then((rows)=>{
+    res.status(200).send({
+      success: true,
+      message: "El producto se ha eliminado",
+      rows: rows
+    });
+  }).catch((err)=>{
+    throw err;
   });
 };
 
@@ -319,20 +374,20 @@ controller.uploadImage = (req, res, next) => {
   // });
 };
 
-controller.getImage = (req, res) => {
-  const fileName = req.params.fileName;
-  var filePath = "src/uploads/products/" + fileName;
-  console.log(filePath);
-  fs.exists(filePath, (exists) => {
-    if (exists) {
-      console.log(path.resolve(filePath));
-      res.sendFile(path.resolve(filePath));
-    } else {
-      res.send({
-        message: "no existe",
-      });
-    }
-  });
-};
+// controller.getImage = (req, res) => {
+//   const fileName = req.params.fileName;
+//   var filePath = "src/uploads/products/" + fileName;
+//   console.log(filePath);
+//   fs.exists(filePath, (exists) => {
+//     if (exists) {
+//       console.log(path.resolve(filePath));
+//       res.sendFile(path.resolve(filePath));
+//     } else {
+//       res.send({
+//         message: "no existe",
+//       });
+//     }
+//   });
+// };
 
 module.exports = controller;
